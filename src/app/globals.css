@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #0a192f;
+  --color-navy-light: #112240;
+  --color-gold: #c5a059;
+  --color-gold-light: #d9bf87;
+  /* Darker gold for text on white/light backgrounds, #c5a059 fails WCAG contrast
+     (~2.5:1) on white; this passes (~5:1). Use text-gold on navy/photo, text-gold-dark on white. */
+  --color-gold-dark: #8a6a2f;
+  --font-sans: var(--font-cairo);
+}
+
+body {
+  background: #ffffff;
+  color: var(--color-navy);
+  font-family: var(--font-cairo), Arial, Helvetica, sans-serif;
+}
+
+@keyframes partners-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(50%);
+  }
+}
+
+.animate-partners-scroll {
+  animation: partners-scroll 100s linear infinite;
+}
