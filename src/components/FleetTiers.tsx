@@ -1,10 +1,8 @@
 import Link from "next/link";
 import {
+  Armchair,
   ArrowLeft,
-  Bus,
-  BusFront,
   BriefcaseMedical,
-  Car,
   Cctv,
   Fan,
   Lightbulb,
@@ -18,26 +16,48 @@ import {
   Volume2,
   Wifi,
 } from "lucide-react";
-import { FLEET_TIERS } from "@/lib/constants";
+import { BOOKING_HREF, FLEET_GROUPS } from "@/lib/constants";
 
-// ponytail: one shared feature list for every tier, taken from the client's reference cards, confirm per vehicle and add a `features` override to FLEET_TIERS where a tier differs
+// ponytail: one shared feature list for every bus tier, taken from the reference cards (VIP 30 / VIP 49), confirm per vehicle and add a per-tier override where one differs
 const FEATURES = [
   { icon: Tv, text: "شاشات" },
   { icon: Wifi, text: "إنترنت" },
   { icon: Volume2, text: "نظام صوتي" },
-  { icon: Snowflake, text: "تبريد وتدفئة" },
-  { icon: Fan, text: "تهوية" },
-  { icon: Usb, text: "شاحن USB" },
-  { icon: PlugZap, text: "قابس 220V" },
+  { icon: Snowflake, text: "تبريد / تسخين" },
+  { icon: Fan, text: "نظام تهوية" },
+  { icon: Usb, text: "منفذ شاحن USB" },
+  { icon: PlugZap, text: "قابس كهربائي 220V" },
   { icon: Lightbulb, text: "إنارة" },
   { icon: Refrigerator, text: "ثلاجة" },
-  { icon: Cctv, text: "كاميرات" },
-  { icon: ShieldCheck, text: "أمان وسلامة" },
-  { icon: BriefcaseMedical, text: "إسعافات" },
+  { icon: Cctv, text: "كاميرات مراقبة" },
+  { icon: ShieldCheck, text: "معدات الأمان والسلامة" },
+  { icon: BriefcaseMedical, text: "إسعافات أولية" },
   { icon: Toilet, text: "دورة مياه" },
 ];
 
-const TYPE_ICON: Record<string, typeof Bus> = { حافلة: Bus, كوستر: BusFront };
+const CARS_GROUP = FLEET_GROUPS.length - 1;
+
+/** Top-view seat plan in the gold line style of the reference cards: two seats, aisle, two seats per row of the bus */
+function SeatMap({ seats }: { seats: number }) {
+  const cols = Math.ceil(seats / 4);
+  const pitch = Math.min(26, 270 / cols);
+  const w = Math.min(15, pitch - 4);
+  const left = 20 + (270 - cols * pitch) / 2;
+  const ys = [14, 31, 54, 71];
+  const dots = Array.from({ length: seats }, (_, i) => ({
+    x: left + Math.floor(i / 4) * pitch,
+    y: ys[i % 4],
+  }));
+  return (
+    <svg viewBox="0 0 310 100" className="h-auto w-full" aria-hidden="true">
+      <rect x="2" y="2" width="306" height="96" rx="44" className="fill-white" />
+      <rect x="14" y="8" width="282" height="84" rx="14" className="fill-none stroke-gold" strokeWidth="1.2" />
+      {dots.map(({ x, y }) => (
+        <rect key={`${x}-${y}`} x={x} y={y} width={w} height="13" rx="3" className="fill-none stroke-gold" strokeWidth="1" />
+      ))}
+    </svg>
+  );
+}
 
 export default function FleetTiers() {
   return (
@@ -48,59 +68,45 @@ export default function FleetTiers() {
         <span className="h-0.5 w-16 rounded-full bg-gold" />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {FLEET_TIERS.map(({ type, seats, max, name }) => {
-          const Icon = TYPE_ICON[type] ?? Car;
-          return (
-            <article
-              key={name}
-              className="group relative flex flex-col overflow-hidden rounded-3xl bg-navy p-7 text-white shadow-xl ring-1 ring-gold/20 transition duration-300 hover:-translate-y-1.5 hover:ring-gold/70"
-            >
-              {/* Oversized seat count as a watermark, so the size of each tier reads at a glance */}
-              <span
-                aria-hidden
-                className="pointer-events-none absolute -bottom-6 -left-2 select-none text-[9rem] font-black leading-none text-white/[0.04]"
-              >
-                {max}
-              </span>
-              <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-l from-transparent via-gold to-transparent" />
+      <div className="flex flex-col gap-14">
+        {FLEET_GROUPS.map(({ title, tiers }, gi) => (
+          <section key={title}>
+            <h3 className="mb-6 text-xl font-extrabold text-navy lg:text-2xl">{title}:</h3>
+            <div className={`grid gap-6 ${gi === CARS_GROUP ? "sm:grid-cols-2 lg:grid-cols-4" : "lg:grid-cols-2"}`}>
+              {tiers.map((name) => {
+                const seats = Number(name.match(/\d+/)?.[0]);
+                const isCar = gi === CARS_GROUP;
+                return (
+                  <article key={name} className="rounded-3xl bg-[#f4eee2] p-6 shadow-sm ring-1 ring-gold/20">
+                    <header className="flex items-center justify-between gap-4">
+                      <h4 className="text-3xl font-extrabold text-gold-dark">{name}</h4>
+                      {!isCar && <div className="w-48 shrink-0 sm:w-64"><SeatMap seats={seats} /></div>}
+                    </header>
 
-              <header className="relative flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-lg font-bold text-white/80">{type}</p>
-                  <p className="mt-1 flex items-baseline gap-2 text-gold">
-                    <span className="text-5xl font-extrabold leading-none">{seats}</span>
-                    <span className="text-lg font-bold">{max > 10 ? "راكب" : "ركاب"}</span>
-                  </p>
-                </div>
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gold shadow-lg">
-                  <Icon className="h-7 w-7 text-navy" />
-                </span>
-              </header>
+                    {!isCar && (
+                      <ul className="mt-5 grid gap-x-8 sm:grid-cols-2">
+                        {[{ icon: Armchair, text: `${seats} ${seats > 10 ? "مقعد" : "مقاعد"}` }, ...FEATURES].map(({ icon: Icon, text }) => (
+                          <li key={text} className="flex items-center gap-3 border-b border-gold/20 py-3 text-sm font-semibold text-navy">
+                            <Icon className="h-6 w-6 shrink-0 text-gold-dark" strokeWidth={1.4} />
+                            {text}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
 
-              <ul className="relative mt-6 grid grid-cols-4 gap-x-2 gap-y-4 border-t border-white/10 pt-6">
-                {FEATURES.map(({ icon: FeatureIcon, text }) => (
-                  <li key={text} className="flex flex-col items-center gap-1.5 text-center">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/40 bg-gold/10">
-                      <FeatureIcon className="h-5 w-5 text-gold" strokeWidth={1.5} />
-                    </span>
-                    <span className="text-[11px] font-medium leading-tight text-white/75">{text}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="relative mt-auto pt-7">
-                <Link
-                  href={`/contact?tier=${encodeURIComponent(name)}#booking`}
-                  className="flex items-center justify-center gap-2 rounded-lg bg-gold px-5 py-3 text-sm font-bold text-navy transition hover:bg-gold-light"
-                >
-                  احجز هذه الفئة
-                  <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
-                </Link>
-              </div>
-            </article>
-          );
-        })}
+                    <Link
+                      href={`${BOOKING_HREF}?tier=${encodeURIComponent(name)}`}
+                      className="group mt-6 flex items-center justify-center gap-2 rounded-lg bg-navy px-5 py-3 text-sm font-bold text-gold transition hover:bg-navy-light"
+                    >
+                      احجز الآن
+                      <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" />
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   );

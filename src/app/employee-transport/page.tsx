@@ -4,14 +4,12 @@ import PhotoHero from "@/components/PhotoHero";
 import RoadPath from "@/components/RoadPath";
 
 export const metadata: Metadata = {
-  title: "نقل موظفين الشركات والمؤسسات والمنشآت الصناعية | الأجنحة الذهبية",
-  description:
-    "شركة متخصصة في نقل الموظفين وتأجير الحافلات الأردنية للشركات والمؤسسات والجامعات.",
+  title: "نقل موظفين الشركات والمؤسسات والمصانع",
 };
 
 const FEATURES = [
-  { icon: Building2, text: "تقديم خدمة نقل الموظفين للشركات والمؤسسات" },
-  { icon: Factory, text: "حلول نقل متكاملة لموظفي المنشآت الصناعية" },
+  { icon: Building2, text: "خدمة نقل الموظفين للشركات والمؤسسات" },
+  { icon: Factory, text: "حلول نقل متكاملة لموظفي المصانع" },
   { icon: Users, text: "خدمة نقل المشاركين والمنظمات والجمعيات" },
   {
     icon: FileText,
@@ -21,29 +19,32 @@ const FEATURES = [
   { icon: Compass, text: "تقديم استشارات النقل داخل الأردن وخارجه" },
 ];
 
+const NUM = "mx-1 text-3xl font-extrabold text-gold-dark lg:text-4xl";
+
 export default function EmployeeTransportPage() {
   return (
     <main>
-      {/* Wide photo (≈2.4:1) so the hero crops almost nothing; copy sits on the right over the open road and parking, clear of the people (English copy will be added later) */}
+      {/* Wide photo (≈2.4:1) so the hero crops almost nothing; copy sits on the right over the open road and parking, clear of the people */}
       <PhotoHero
         image="/images/employee-hero.png"
         alt="موظفون يستقلون حافلة الأجنحة الذهبية أمام مبنى شركة"
         objectPosition="object-[62%_center]"
         heightClass="lg:min-h-[600px] 2xl:min-h-[700px]"
         mobileAspect="2.36/1"
-          title="الأجنحة الذهبية لتأجير الحافلات الأردنية"
-        chip="حلول نقل يومية موثوقة لشركتك"
+        title="تأجير الحافلات الأردنية"
       />
 
       <section className="bg-white pt-16 lg:pt-20">
         <div className="mx-auto max-w-3xl px-4 text-center lg:px-8">
           <p className="text-base leading-loose text-navy/80 lg:text-lg">
-            شركة متخصصة في نقل الموظفين وتأجير الحافلات الأردنية. وتقدم حلول نقل احترافية للشركات
-            والمؤسسات والجامعات بحافلات حديثة ومريحة، وآمنة، وفريق سائقين محترفين، وتنظيم دقيق
-            للمسارات والمواعيد وفق احتياجات كل جهة، لضمان تجربة نقل موثوقة، مريحة ومنظمة.
+            الأجنحة الذهبية لتأجير الحافلات الأردنية متخصصة في نقل الموظفين وتأجير الحافلات
+            الأردنية وتقدم خدمة نقل احترافية للشركات والمؤسسات والجامعات بحافلات حديثة ومريحة،
+            وآمنة، وفريق سائقين محترفين، وتنظيم دقيق للمسارات والمواعيد وفق احتياجات كل جهة،
+            لضمان تجربة نقل موثوقة، مريحة ومنظمة
           </p>
-          <p className="mt-6 text-xl font-bold text-gold-dark">
-            الأجنحة الذهبية… شريككم الموثوق في النقل.
+          <p className="mt-8 rounded-2xl border border-gold-light/60 bg-gold-light/10 px-6 py-6 text-xl font-bold leading-loose text-navy">
+            على مدار<span className={NUM}>20</span>عام تنطلق كل صباح<span className={NUM}>57</span>
+            رحلة تقل<span className={NUM}>1197</span>موظف الى مواقع عملهم بكل سهولة ويسر
           </p>
         </div>
       </section>

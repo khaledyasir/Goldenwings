@@ -1,146 +1,98 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, MessageCircle, MapPin } from "lucide-react";
-import { FacebookIcon, InstagramIcon } from "@/components/SocialSidebar";
-import {
-  FACEBOOK_LINK,
-  INSTAGRAM_LINK,
-  MAPS_LINK,
-  NAV_LINKS,
-  PHONE_DISPLAY,
-  PHONE_TEL,
-  WHATSAPP_LINK,
-} from "@/lib/constants";
+import { Phone } from "lucide-react";
+import { CONTACT_ICONS } from "@/components/SocialSidebar";
+import { NAV_LINKS, PHONE_DISPLAY, PHONE_TEL, SERVICE_LINKS } from "@/lib/constants";
 
-const SERVICE_LINKS = NAV_LINKS.find((l) => l.children)?.children ?? [];
+const QUICK_LINKS = NAV_LINKS.filter((l) => !l.children);
 
-function Heading({ children }: { children: string }) {
+function Column({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mb-5">
-      <h3 className="text-base font-bold text-white">{children}</h3>
-      <div className="mt-2 h-0.5 w-10 rounded-full bg-gold" />
+    <div>
+      <h3 className="text-base font-bold text-white">{title}</h3>
+      <div className="mb-5 mt-2 h-0.5 w-10 rounded-full bg-gold" />
+      {children}
     </div>
   );
 }
 
-const SOCIALS = [
-  { label: "انستجرام", href: INSTAGRAM_LINK, icon: InstagramIcon },
-  { label: "فيسبوك", href: FACEBOOK_LINK, icon: FacebookIcon },
-  { label: "واتساب", href: WHATSAPP_LINK, icon: MessageCircle },
-];
-
-const linkClass = "text-sm text-white/70 transition hover:text-gold";
-
-function ContactRow({
-  icon: Icon,
-  children,
-  href,
-  external,
-}: {
-  icon: typeof Phone;
-  children: React.ReactNode;
-  href?: string;
-  external?: boolean;
-}) {
-  const content = (
-    <>
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-gold">
-        <Icon className="h-4 w-4" />
-      </span>
-      <span>{children}</span>
-    </>
-  );
-  const cls = "flex items-center gap-3 text-sm text-white/80";
-  return href ? (
-    <a
-      href={href}
-      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={`${cls} transition hover:text-gold`}
-    >
-      {content}
-    </a>
-  ) : (
-    <div className={cls}>{content}</div>
+function LinkList({ links }: { links: { label: string; href: string }[] }) {
+  return (
+    <ul className="space-y-3">
+      {links.map((link) => (
+        <li key={link.label}>
+          <Link href={link.href} className="text-sm text-white/75 transition hover:text-gold">
+            {link.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t-4 border-gold bg-navy text-white">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-10 px-4 py-14 lg:grid-cols-[1.4fr_1fr_1.2fr_1.4fr] lg:gap-x-12 lg:px-8">
-        {/* lg:order-last puts the brand column on the left under RTL */}
-        <div className="col-span-2 lg:order-last lg:col-span-1">
-          <Image
-            src="/logo-transparent.png"
-            alt="الأجنحة الذهبية لخدمة النقل"
-            width={114}
-            height={64}
-            className="h-16 w-auto"
-          />
-          <p className="mt-5 max-w-xs text-sm leading-loose text-white/70">
-            الأجنحة الذهبية لتأجير الحافلات الأردنية، شريككم الموثوق في النقل.
-          </p>
-          <div className="mt-5 flex gap-3">
-            {SOCIALS.map(({ label, href, icon: Icon }) => (
+    <footer id="contact" className="relative mt-auto scroll-mt-20 bg-navy text-white">
+      {/* Wavy top edge with a fine gold line along it, so the footer rises out of the page instead of starting on a hard straight cut. Same navy as the map panel, so it disappears when that sits above. */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 1440 48"
+        preserveAspectRatio="none"
+        className="absolute inset-x-0 bottom-full h-8 w-full lg:h-12"
+      >
+        <path d="M0 48V26C240 2 480 2 720 26S1200 50 1440 26V48Z" className="fill-navy" />
+        <path
+          d="M0 26C240 2 480 2 720 26S1200 50 1440 26"
+          className="fill-none stroke-gold/60"
+          strokeWidth="1.5"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+
+      {/* Four even columns: quick links, services, contact, brand (logo ends up on the left under RTL) */}
+      <div className="relative mx-auto grid max-w-7xl gap-x-10 gap-y-10 px-4 pb-14 pt-8 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
+        <Column title="روابط سريعة">
+          <LinkList links={QUICK_LINKS} />
+        </Column>
+
+        <Column title="خدماتنا">
+          <LinkList links={SERVICE_LINKS} />
+        </Column>
+
+        <Column title="تواصل معنا">
+          <a
+            href={PHONE_TEL}
+            dir="ltr"
+            className="mb-5 flex w-fit items-center gap-3 rounded-md border border-gold px-5 py-2.5 text-lg font-bold transition hover:bg-gold hover:text-navy"
+          >
+            <Phone className="h-5 w-5 text-gold" />
+            {PHONE_DISPLAY}
+          </a>
+          <div className="flex flex-wrap gap-3">
+            {CONTACT_ICONS.map(({ label, href, icon: Icon, external }) => (
               <a
                 key={label}
                 href={href}
-                target="_blank"
-                rel="noopener noreferrer"
                 aria-label={label}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/40 text-gold transition hover:bg-gold hover:text-navy"
+                title={label}
+                {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/60 text-gold transition hover:bg-gold hover:text-navy"
               >
                 <Icon className="h-5 w-5" />
               </a>
             ))}
           </div>
+        </Column>
+
+        <div className="flex items-start sm:col-span-2 lg:col-span-1 lg:justify-end">
+          <Image
+            src="/logo-transparent.png"
+            alt="الأجنحة الذهبية لخدمة النقل"
+            width={114}
+            height={64}
+            className="h-20 w-auto"
+          />
         </div>
-
-        <nav aria-label="روابط سريعة" className="col-span-2 lg:col-span-1">
-          <Heading>روابط سريعة</Heading>
-          <ul className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} className={linkClass}>
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <nav aria-label="خدماتنا" className="col-span-2 sm:col-span-1">
-          <Heading>خدماتنا</Heading>
-          <ul className="space-y-3">
-            {SERVICE_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link href={link.href} className={linkClass}>
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="col-span-2 sm:col-span-1">
-          <Heading>تواصل معنا</Heading>
-          <div className="space-y-4">
-            <ContactRow icon={Phone} href={PHONE_TEL}>
-              <span dir="ltr">{PHONE_DISPLAY}</span>
-            </ContactRow>
-            <ContactRow icon={MessageCircle} href={WHATSAPP_LINK} external>
-              تواصل عبر واتساب
-            </ContactRow>
-            <ContactRow icon={MapPin} href={MAPS_LINK} external>
-              عمّان، الأردن (عرض الموقع على الخريطة)
-            </ContactRow>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-white/10 py-5 text-center text-xs text-white/50">
-        © {new Date().getFullYear()} الأجنحة الذهبية لخدمة النقل وتأجير الحافلات الأردنية. جميع
-        الحقوق محفوظة.
       </div>
     </footer>
   );

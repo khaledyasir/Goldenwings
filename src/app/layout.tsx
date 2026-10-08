@@ -3,7 +3,6 @@ import { Cairo } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import TaglineBand from "@/components/TaglineBand";
 import SocialSidebar from "@/components/SocialSidebar";
 
 const cairo = Cairo({
@@ -14,8 +13,7 @@ const cairo = Cairo({
 
 export const metadata: Metadata = {
   title: "الأجنحة الذهبية لخدمة النقل وتأجير الحافلات الأردنية",
-  description:
-    "شركة متخصصة في نقل الموظفين وتأجير الحافلات الأردنية، والنقل السياحي المتخصص، والنقل الدولي.",
+  description: "حلول نقل متكاملة تلبي تطلعاتكم",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -24,7 +22,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col max-md:pb-14">
         <Navbar />
         {children}
-        <TaglineBand />
         <Footer />
         <SocialSidebar />
       </body>

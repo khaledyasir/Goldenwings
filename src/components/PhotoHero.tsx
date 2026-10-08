@@ -16,8 +16,12 @@ type PhotoHeroProps = {
   /** Pin the copy to the top of the hero instead of centring it, for photos where the subject fills the lower half */
   alignTop?: boolean;
   title: string;
+  /** Gold line under the title */
+  subtitle?: string;
   description?: string;
   chip?: string;
+  /** Hide the call / book buttons, for pages that show their own booking button right below */
+  hideCta?: boolean;
 };
 
 export default function PhotoHero({
@@ -29,8 +33,10 @@ export default function PhotoHero({
   mobileAspect,
   alignTop = false,
   title,
+  subtitle,
   description,
   chip,
+  hideCta = false,
 }: PhotoHeroProps) {
   return (
     <section
@@ -85,15 +91,23 @@ export default function PhotoHero({
             {title}
           </h1>
 
+          {subtitle && (
+            <p className="mt-3 text-xl font-bold text-gold drop-shadow-[0_1px_6px_rgba(10,25,47,0.9)] lg:text-2xl">
+              {subtitle}
+            </p>
+          )}
+
           {description && (
             <p className="mt-5 text-base leading-loose text-white/90 drop-shadow-[0_1px_6px_rgba(10,25,47,0.9)] lg:text-lg">
               {description}
             </p>
           )}
 
-          <div className="mt-8 flex justify-center lg:justify-start">
-            <CtaButtons dark />
-          </div>
+          {!hideCta && (
+            <div className="mt-8 flex justify-center lg:justify-start">
+              <CtaButtons dark />
+            </div>
+          )}
         </div>
       </div>
 
