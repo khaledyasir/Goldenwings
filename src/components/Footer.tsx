@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Phone } from "lucide-react";
 import { CONTACT_ICONS } from "@/components/SocialSidebar";
-import { NAV_LINKS, PHONE_DISPLAY, PHONE_TEL, SERVICE_LINKS } from "@/lib/constants";
+import { NAV_LINKS, PHONE_DISPLAY, EMAIL, PHONE_TEL, SERVICE_LINKS } from "@/lib/constants";
 
 const QUICK_LINKS = NAV_LINKS.filter((l) => !l.children);
 
@@ -68,6 +68,9 @@ export default function Footer() {
             <Phone className="h-5 w-5 text-gold" />
             {PHONE_DISPLAY}
           </a>
+          <a href={`mailto:${EMAIL}`} dir="ltr" className="mb-5 block w-fit text-sm text-white/75 transition hover:text-gold">
+            {EMAIL}
+          </a>
           <div className="flex flex-wrap gap-3">
             {CONTACT_ICONS.map(({ label, href, icon: Icon, external }) => (
               <a
@@ -93,6 +96,21 @@ export default function Footer() {
             className="h-20 w-auto"
           />
         </div>
+      </div>
+
+      <div className="border-t border-white/10 px-4 py-6 text-center text-sm text-white/75">
+        <p>
+          حقوق الطبع والنشر © {new Date().getFullYear()} الأجنحة الذهبية لخدمة النقل وتاجير الحافلات. جميع الحقوق محفوظة.
+        </p>
+        <a
+          href="https://www.tenderjo.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="TenderJo"
+          className="mt-4 inline-block"
+        >
+          <Image src="/tenderjo-logo.png" alt="TenderJo" width={120} height={34} className="h-8 w-auto" />
+        </a>
       </div>
     </footer>
   );

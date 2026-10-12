@@ -1,5 +1,5 @@
-import { Phone, MessageCircle } from "lucide-react";
-import { FACEBOOK_LINK, INSTAGRAM_LINK, PHONE_TEL, WHATSAPP_LINK } from "@/lib/constants";
+import { Mail, Phone, MessageCircle } from "lucide-react";
+import { EMAIL, FACEBOOK_LINK, INSTAGRAM_LINK, PHONE_TEL, WHATSAPP_LINK } from "@/lib/constants";
 
 // lucide-react v1 dropped brand icons, so Instagram/Facebook are inline SVGs
 export function InstagramIcon({ className }: { className?: string }) {
@@ -24,6 +24,7 @@ export function FacebookIcon({ className }: { className?: string }) {
 export const CONTACT_ICONS = [
   { label: "اتصال", href: PHONE_TEL, icon: Phone, external: false },
   { label: "واتساب", href: WHATSAPP_LINK, icon: MessageCircle, external: true },
+  { label: "البريد", href: `mailto:${EMAIL}`, icon: Mail, external: false },
   { label: "فيسبوك", href: FACEBOOK_LINK, icon: FacebookIcon, external: true },
   { label: "انستا", href: INSTAGRAM_LINK, icon: InstagramIcon, external: true },
 ];

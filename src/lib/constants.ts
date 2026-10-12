@@ -107,3 +107,5 @@ export type Place = { image: string; place: string; description: string };
 export const ADVENTURE_TRIPS: Trip[] = [];
 export const TOURISM_TRIPS: Trip[] = [];
 export const PLACES: Place[] = [];
+
+export const EMAIL = "sales@goldenwingsjo.com";

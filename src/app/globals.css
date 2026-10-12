@@ -29,3 +29,11 @@ body {
 .animate-partners-scroll {
   animation: partners-scroll 100s linear infinite;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+html {
+  scroll-behavior: smooth;
+}
