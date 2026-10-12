@@ -34,10 +34,10 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl flex-row-reverse items-center justify-between gap-4 px-4 py-3 xl:px-8">
         <Link href="/" className="flex shrink-0 items-center">
           <Image
-            src="/logo-transparent.png"
+            src="/logo-v3.png"
             alt="الأجنحة الذهبية لخدمة النقل"
-            width={425}
-            height={193}
+            width={1212}
+            height={573}
             className="h-14 w-auto xl:h-[72px]"
             priority
           />

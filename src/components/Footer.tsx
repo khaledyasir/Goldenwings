@@ -89,10 +89,10 @@ export default function Footer() {
 
         <div className="flex items-start sm:col-span-2 lg:col-span-1 lg:justify-end">
           <Image
-            src="/logo-transparent.png"
+            src="/logo-v3.png"
             alt="الأجنحة الذهبية لخدمة النقل"
-            width={425}
-            height={193}
+            width={1212}
+            height={573}
             className="h-20 w-auto"
           />
         </div>
