@@ -36,8 +36,8 @@ export default function Navbar() {
           <Image
             src="/logo-transparent.png"
             alt="الأجنحة الذهبية لخدمة النقل"
-            width={260}
-            height={144}
+            width={425}
+            height={193}
             className="h-14 w-auto xl:h-[72px]"
             priority
           />

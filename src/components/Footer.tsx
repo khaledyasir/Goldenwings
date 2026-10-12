@@ -91,8 +91,8 @@ export default function Footer() {
           <Image
             src="/logo-transparent.png"
             alt="الأجنحة الذهبية لخدمة النقل"
-            width={114}
-            height={64}
+            width={425}
+            height={193}
             className="h-20 w-auto"
           />
         </div>
