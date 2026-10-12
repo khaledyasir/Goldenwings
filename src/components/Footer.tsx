@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Phone } from "lucide-react";
-import { CONTACT_ICONS } from "@/components/SocialSidebar";
-import { NAV_LINKS, PHONE_DISPLAY, EMAIL, PHONE_TEL, SERVICE_LINKS } from "@/lib/constants";
+import { CONTACT_ICONS } from "@/components/contactIcons";
+import { BOOKING_HREF, EMAIL, PHONE_DISPLAY, PHONE_TEL, SERVICE_LINKS } from "@/lib/constants";
 
-const QUICK_LINKS = NAV_LINKS.filter((l) => !l.children);
+const FOOTER_LINKS = [...SERVICE_LINKS, { label: "احجز الآن", href: BOOKING_HREF }];
 
 function Column({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -33,30 +33,10 @@ function LinkList({ links }: { links: { label: string; href: string }[] }) {
 export default function Footer() {
   return (
     <footer id="contact" className="relative mt-auto scroll-mt-20 bg-navy text-white">
-      {/* Wavy top edge with a fine gold line along it, so the footer rises out of the page instead of starting on a hard straight cut. Same navy as the map panel, so it disappears when that sits above. */}
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 1440 48"
-        preserveAspectRatio="none"
-        className="absolute inset-x-0 bottom-full h-8 w-full lg:h-12"
-      >
-        <path d="M0 48V26C240 2 480 2 720 26S1200 50 1440 26V48Z" className="fill-navy" />
-        <path
-          d="M0 26C240 2 480 2 720 26S1200 50 1440 26"
-          className="fill-none stroke-gold/60"
-          strokeWidth="1.5"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-
-      {/* Four even columns: quick links, services, contact, brand (logo ends up on the left under RTL) */}
-      <div className="relative mx-auto grid max-w-7xl gap-x-10 gap-y-10 px-4 pb-14 pt-8 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
-        <Column title="روابط سريعة">
-          <LinkList links={QUICK_LINKS} />
-        </Column>
-
+      {/* Three even columns: services + book link, contact, brand (logo ends up on the left under RTL) */}
+      <div className="relative mx-auto grid max-w-7xl gap-x-10 gap-y-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-3 lg:px-8">
         <Column title="خدماتنا">
-          <LinkList links={SERVICE_LINKS} />
+          <LinkList links={FOOTER_LINKS} />
         </Column>
 
         <Column title="تواصل معنا">

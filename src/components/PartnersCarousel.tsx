@@ -6,7 +6,7 @@ const TILE = "flex h-24 w-52 shrink-0 items-center justify-center px-4 transitio
 
 export default function PartnersCarousel() {
   return (
-    <section className="bg-white py-12">
+    <section className="bg-white pb-12 pt-20">
       <div className="mx-auto flex max-w-7xl items-center justify-center gap-5 px-4 lg:px-8">
         <span className="h-0.5 w-20 rounded-full bg-gold" />
         <h2 className="text-2xl font-bold text-navy lg:text-3xl">الشركاء</h2>

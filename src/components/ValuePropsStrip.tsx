@@ -16,12 +16,12 @@ export default function ValuePropsStrip() {
               return (
                 <div
                   key={title}
-                  className="flex flex-col items-center gap-3 bg-navy px-4 py-7 text-center transition hover:bg-navy-light lg:flex-row lg:gap-4 lg:px-6 lg:text-start"
+                  className="flex flex-col items-center gap-3 bg-navy px-4 py-10 text-center transition hover:bg-navy-light lg:flex-row lg:gap-4 lg:px-6 lg:text-start"
                 >
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-gold/60 bg-gold/10">
-                    <Icon className="h-7 w-7 text-gold" strokeWidth={1.5} />
+                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-gold/60 bg-gold/10">
+                    <Icon className="h-8 w-8 text-gold" strokeWidth={1.5} />
                   </span>
-                  <h3 className="text-sm font-bold lg:text-base">{title}</h3>
+                  <h3 className="text-base font-bold lg:text-lg">{title}</h3>
                 </div>
               );
             })}

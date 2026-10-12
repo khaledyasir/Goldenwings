@@ -1,40 +1,47 @@
 import type { Metadata } from "next";
 import { Quote } from "lucide-react";
 import PageHero from "@/components/PageHero";
-import { REVIEWS } from "@/lib/constants";
+import { REVIEWS, type Review } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "آراء العملاء",
 };
 
+// Same tile as the partners grid: the client shows up front, the review slides in on hover/focus (focus covers tapping on touch screens)
+const TILE =
+  "group relative flex h-44 items-center justify-center overflow-hidden rounded-2xl bg-white p-4 shadow-sm ring-1 ring-navy/10 outline-none transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:ring-gold/60 focus-visible:ring-2 focus-visible:ring-gold";
+
+function ReviewTile({ quote, name, company }: Review) {
+  return (
+    <div tabIndex={0} className={TILE}>
+      <div className="text-center transition duration-300 group-hover:scale-95 group-hover:opacity-20 group-focus-visible:opacity-20">
+        <Quote className="mx-auto mb-2 h-6 w-6 text-gold" />
+        <p className="text-lg font-extrabold text-navy/80">{name}</p>
+        <p className="text-sm text-gold-dark">{company}</p>
+      </div>
+      <div className="absolute inset-0 flex translate-y-full items-center justify-center overflow-y-auto bg-navy/95 px-4 py-3 text-center text-sm leading-relaxed text-white transition duration-300 group-hover:translate-y-0 group-focus-visible:translate-y-0">
+        {quote}
+      </div>
+    </div>
+  );
+}
+
+/** Shown until real reviews are added: only the field names, no invented text */
+const PLACEHOLDER: Review = { name: "اسم العميل", company: "الشركة", quote: "نص التقييم" };
+
 export default function TestimonialsPage() {
+  const reviews = REVIEWS.length ? REVIEWS : Array.from({ length: 8 }, () => PLACEHOLDER);
   return (
     <main>
       <PageHero title="آراء العملاء" />
 
-      {REVIEWS.length > 0 && (
-        <section className="bg-gradient-to-b from-white via-gold-light/10 to-white py-20">
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-2 lg:grid-cols-3 lg:px-8">
-            {REVIEWS.map((review) => (
-              <figure
-                key={`${review.name}-${review.company}`}
-                className="relative rounded-3xl bg-white p-8 pt-12 shadow-[0_18px_50px_-20px_rgba(10,25,47,0.35)] ring-1 ring-navy/10"
-              >
-                <span className="absolute -top-6 right-8 flex h-12 w-12 items-center justify-center rounded-full bg-gold shadow-lg ring-4 ring-white">
-                  <Quote className="h-5 w-5 text-navy" />
-                </span>
-                <blockquote className="text-base leading-loose text-navy/80">
-                  {review.quote}
-                </blockquote>
-                <figcaption className="mt-6 border-t border-navy/10 pt-4">
-                  <p className="font-bold text-navy">{review.name}</p>
-                  <p className="text-sm text-gold-dark">{review.company}</p>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
-      )}
+      <section className="bg-white py-12">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
+          {reviews.map((review, i) => (
+            <ReviewTile key={i} {...review} />
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

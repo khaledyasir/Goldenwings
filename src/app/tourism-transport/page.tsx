@@ -39,7 +39,7 @@ export default function TourismTransportPage() {
       {/* Full-bleed photo hero like the employee page: copy sits over the open valley on the right,
           keeping the Monastery, bus and tourists clear. On lg the photo is shifted left and solid navy fills the
           freed strip under the copy; below lg the photo stacks above the copy. */}
-      <section className="relative isolate overflow-hidden bg-navy pb-16 text-white lg:pb-24">
+      <section className="relative isolate overflow-hidden bg-navy pb-10 text-white lg:pb-12">
         <div className="relative aspect-[16/10] w-full lg:absolute lg:inset-y-0 lg:-left-[14%] lg:right-[14%] lg:aspect-auto">
           <Image
             src="/images/tourism-hero.png"
@@ -72,28 +72,6 @@ export default function TourismTransportPage() {
               <CtaButtons dark />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Placed right under the hero and pulled up over its edge so the list is the first thing read after the intro */}
-      <section className="relative z-10 -mt-12 px-4 lg:-mt-16 lg:px-8">
-        <div className="mx-auto max-w-6xl rounded-3xl border-2 border-gold bg-white p-6 shadow-[0_30px_70px_-25px_rgba(10,25,47,0.55)] lg:p-10">
-          <h2 className="mb-8 text-center text-2xl font-extrabold text-navy lg:text-3xl">
-            لماذا تختار الأجنحة الذهبية للنقل السياحي؟
-          </h2>
-          <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {WHY.map((w) => (
-              <li
-                key={w}
-                className="flex items-start gap-3 rounded-xl bg-gold-light/10 p-5 ring-1 ring-gold-light/50"
-              >
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold">
-                  <Check className="h-4 w-4 text-navy" />
-                </span>
-                <span className="text-base font-bold leading-relaxed text-navy">{w}</span>
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
 
@@ -135,6 +113,27 @@ export default function TourismTransportPage() {
           <p className="mt-6 text-center text-xl font-extrabold text-gold-dark lg:text-2xl">
             سيقدم لكم فريقنا المحترف تجربة نقل لرحلة استثنائية
           </p>
+        </div>
+      </section>
+
+      <section className="bg-white px-4 py-12 lg:px-8">
+        <div className="mx-auto max-w-4xl rounded-2xl border-2 border-gold bg-white p-5 shadow-lg lg:p-7">
+          <h2 className="mb-5 text-center text-xl font-extrabold text-navy lg:text-2xl">
+            لماذا تختار الأجنحة الذهبية للنقل السياحي؟
+          </h2>
+          <ul className="grid gap-3 md:grid-cols-2">
+            {WHY.map((w) => (
+              <li
+                key={w}
+                className="flex items-start gap-3 rounded-xl bg-gold-light/10 p-3.5 ring-1 ring-gold-light/50"
+              >
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold">
+                  <Check className="h-3.5 w-3.5 text-navy" />
+                </span>
+                <span className="text-sm font-bold leading-relaxed text-navy">{w}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </main>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Building2, Factory, Users, FileText, GraduationCap, Compass } from "lucide-react";
 import PhotoHero from "@/components/PhotoHero";
-import RoadPath from "@/components/RoadPath";
 
 export const metadata: Metadata = {
   title: "نقل موظفين الشركات والمؤسسات والمصانع",
@@ -32,6 +31,7 @@ export default function EmployeeTransportPage() {
         heightClass="lg:min-h-[600px] 2xl:min-h-[700px]"
         mobileAspect="2.36/1"
         title="تأجير الحافلات الأردنية"
+        bookLabel="طلب عرض سعر"
       />
 
       <section className="bg-white pt-16 lg:pt-20">
@@ -49,32 +49,23 @@ export default function EmployeeTransportPage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-white py-20">
-        <div className="pointer-events-none absolute left-1/2 top-16 bottom-16 hidden w-40 -translate-x-1/2 lg:block">
-          <RoadPath />
-        </div>
-
-        <div className="relative mx-auto max-w-4xl px-4 lg:px-8">
-          <div className="flex flex-col gap-10">
-            {FEATURES.map(({ icon: Icon, text }, i) => {
-              const alignEnd = i % 2 === 1;
-              return (
-                <div
-                  key={text}
-                  className={`flex items-center gap-5 lg:w-[55%] ${
-                    alignEnd ? "lg:ml-auto lg:flex-row-reverse lg:text-left" : "lg:mr-auto"
-                  }`}
-                >
-                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gold shadow-lg ring-4 ring-white">
-                    <Icon className="h-7 w-7 text-navy" />
-                  </span>
-                  <p className="rounded-2xl border border-gold-light/50 bg-gold-light/10 p-5 text-base font-semibold text-navy shadow-sm">
-                    {text}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+      <section className="bg-gray-50 py-16 lg:py-20">
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3 lg:px-8">
+          {FEATURES.map(({ icon: Icon, text }, i) => (
+            <article
+              key={text}
+              className="group relative overflow-hidden rounded-2xl bg-white p-7 shadow-sm ring-1 ring-navy/10 transition hover:-translate-y-1 hover:shadow-xl hover:ring-gold/60"
+            >
+              <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-l from-transparent via-gold to-transparent" />
+              <span className="absolute -bottom-4 left-3 select-none text-8xl font-extrabold text-gold/15">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-navy shadow-md ring-4 ring-gold/30 transition group-hover:bg-gold">
+                <Icon className="h-7 w-7 text-gold transition group-hover:text-navy" />
+              </span>
+              <p className="relative mt-5 text-base font-bold leading-loose text-navy">{text}</p>
+            </article>
+          ))}
         </div>
       </section>
     </main>

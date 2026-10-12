@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Plane, Landmark, MapPin } from "lucide-react";
 import PhotoHero from "@/components/PhotoHero";
-import { BOOKING_HREF } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "النقل السياحي من وإلى المطار والمعابر الحدودية",
@@ -28,21 +26,11 @@ export default function AirportTransportPage() {
         heightClass="lg:min-h-[560px] 2xl:min-h-[640px]"
         mobileAspect="2.4/1"
         title="النقل السياحي من وإلى المطار والمعابر الحدودية"
-        hideCta
       />
 
       <section className="bg-white pt-14 lg:pt-16">
-        <div className="mx-auto flex max-w-4xl flex-col items-center gap-5 px-4 text-center lg:px-8">
-          <p className="text-lg font-bold text-navy">
-            حجز خدمة النقل السياحي من المطار أو المعابر الحدودية
-          </p>
-          <Link
-            href={BOOKING_HREF}
-            className="rounded-md bg-gold px-10 py-3.5 text-base font-bold text-navy shadow-md transition hover:bg-gold-light"
-          >
-            احجز الآن
-          </Link>
-          <p className="mt-4 text-base leading-loose text-navy/80 lg:text-lg">
+        <div className="mx-auto flex max-w-4xl flex-col items-center px-4 text-center lg:px-8">
+          <p className="text-base leading-loose text-navy/80 lg:text-lg">
             تنقل مريح وآمن مع الأجنحة الذهبية للنقل السياحي. خدمات نقل سياحي احترافية للسياح
             والقادمين والمغادرين من وإلى مطار الملكة علياء الدولي والمعابر الحدودية، أو الفنادق
             في مختلف الوجهات السياحية.

@@ -21,7 +21,6 @@ export const SERVICE_LINKS = [
   { label: "النقل السياحي المتخصص", href: "/tourism-transport" },
   { label: "النقل الدولي", href: "/international-transport" },
   { label: "نقل المطار والمعابر الحدودية", href: "/airport-transport" },
-  { label: "دليل الرحلات", href: "/trips" },
 ];
 
 /** Every page of the site, titles taken from the content document */
@@ -32,8 +31,9 @@ export const NAV_LINKS: NavLink[] = [
   { label: "الشركاء", href: "/partners" },
   { label: "آراء العملاء", href: "/testimonials" },
   { label: "الحجز", href: BOOKING_HREF },
+  { label: "دليل الرحلات", href: "/trips" },
+  { label: "الإدخالات", href: "/entries" },
   { label: "تواصل معنا", href: "#contact" },
-  { label: "خريطة الموقع", href: "/#map" },
 ];
 
 /** Logo is shown when there is one; partners without a logo file are shown by name. */
@@ -109,3 +109,14 @@ export const TOURISM_TRIPS: Trip[] = [];
 export const PLACES: Place[] = [];
 
 export const EMAIL = "sales@goldenwingsjo.com";
+
+/** Dropdown choices on the entries form. ponytail: placeholder values, replaced by dashboard-managed lists later */
+export const ENTRY_OPTIONS = {
+  movement: ["سياحة", "نقل موظفين"],
+  type: ["مستأجر", "داخلي"],
+  client: ["شركة 1", "شركة 2"],
+  trip: ["رحلة 1", "رحلة 2"],
+  bus: ["حافلة 1", "حافلة 2"],
+  driver: ["سائق 1", "سائق 2"],
+  authorization: ["تفويض 1", "تفويض 2"],
+};

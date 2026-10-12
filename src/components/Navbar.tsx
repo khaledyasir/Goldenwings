@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Phone, ChevronDown, Users, Mountain, Globe, Plane, MapPinned } from "lucide-react";
+import { Menu, X, Phone, ChevronDown, Users, Mountain, Globe, Plane } from "lucide-react";
 import { NAV_LINKS, PHONE_DISPLAY, PHONE_TEL, type NavLink } from "@/lib/constants";
 
 const SERVICE_ICONS = {
@@ -12,7 +12,6 @@ const SERVICE_ICONS = {
   "/tourism-transport": Mountain,
   "/international-transport": Globe,
   "/airport-transport": Plane,
-  "/trips": MapPinned,
 } as const;
 
 function ChildIcon({ href, className }: { href: string; className: string }) {
@@ -34,7 +33,7 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl flex-row-reverse items-center justify-between gap-4 px-4 py-3 xl:px-8">
         <Link href="/" className="flex shrink-0 items-center">
           <Image
-            src="/logo-v3.png"
+            src="/logo-header.png"
             alt="الأجنحة الذهبية لخدمة النقل"
             width={1212}
             height={573}

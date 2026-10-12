@@ -22,6 +22,8 @@ type PhotoHeroProps = {
   chip?: string;
   /** Hide the call / book buttons, for pages that show their own booking button right below */
   hideCta?: boolean;
+  /** Text of the gold booking button */
+  bookLabel?: string;
 };
 
 export default function PhotoHero({
@@ -37,6 +39,7 @@ export default function PhotoHero({
   description,
   chip,
   hideCta = false,
+  bookLabel,
 }: PhotoHeroProps) {
   return (
     <section
@@ -105,7 +108,7 @@ export default function PhotoHero({
 
           {!hideCta && (
             <div className="mt-8 flex justify-center lg:justify-start">
-              <CtaButtons dark />
+              <CtaButtons dark bookLabel={bookLabel} />
             </div>
           )}
         </div>
