@@ -26,12 +26,21 @@ body {
   }
 }
 
+@keyframes partners-scroll-ltr {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 .animate-partners-scroll {
   animation: partners-scroll 100s linear infinite;
 }
 
-html {
-  scroll-behavior: smooth;
+html[dir="ltr"] .animate-partners-scroll {
+  animation-name: partners-scroll-ltr;
 }
 
 html {

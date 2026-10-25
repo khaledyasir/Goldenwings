@@ -1,9 +1,11 @@
 import { ShieldCheck, Clock, UserCheck, Headset } from "lucide-react";
 import { VALUE_PROPS } from "@/lib/constants";
+import { getLang } from "@/lib/getLang";
 
 const ICONS = [ShieldCheck, Clock, UserCheck, Headset];
 
-export default function ValuePropsStrip() {
+export default async function ValuePropsStrip() {
+  const lang = await getLang();
   return (
     <section className="bg-white pb-10 pt-4">
       <div className="mx-auto max-w-7xl px-4 lg:px-6">
@@ -15,13 +17,13 @@ export default function ValuePropsStrip() {
               const Icon = ICONS[i];
               return (
                 <div
-                  key={title}
+                  key={title.en}
                   className="flex flex-col items-center gap-3 bg-navy px-4 py-10 text-center transition hover:bg-navy-light lg:flex-row lg:gap-4 lg:px-6 lg:text-start"
                 >
                   <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-gold/60 bg-gold/10">
                     <Icon className="h-8 w-8 text-gold" strokeWidth={1.5} />
                   </span>
-                  <h3 className="text-base font-bold lg:text-lg">{title}</h3>
+                  <h3 className="text-base font-bold lg:text-lg">{title[lang]}</h3>
                 </div>
               );
             })}

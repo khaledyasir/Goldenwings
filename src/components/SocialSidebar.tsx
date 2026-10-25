@@ -1,16 +1,21 @@
 import { CONTACT_ICONS } from "@/components/contactIcons";
+import { getLang } from "@/lib/getLang";
+import { t } from "@/lib/i18n";
 
 // Gold so it stands out over both the navy header/footer and the page photos
-export default function SocialSidebar() {
+export default async function SocialSidebar() {
+  const lang = await getLang();
   return (
     <nav
-      aria-label="تواصل معنا"
+      aria-label={t(lang, "تواصل معنا", "Contact Us")}
       // Phones: bottom bar so it never covers content. md+: right-edge rail, vertically centred (the document asks for the right of the page).
       className="fixed z-40 flex overflow-hidden bg-gold shadow-lg max-md:inset-x-0 max-md:bottom-0 max-md:border-t max-md:border-navy/30 md:right-0 md:top-1/2 md:-translate-y-1/2 md:flex-col md:rounded-l-xl"
     >
-      {CONTACT_ICONS.map(({ label, href, icon: Icon, external }) => (
+      {CONTACT_ICONS.map(({ label: bi, href, icon: Icon, external }) => {
+        const label = bi[lang];
+        return (
         <a
-          key={label}
+          key={bi.en}
           href={href}
           aria-label={label}
           title={label}
@@ -20,7 +25,8 @@ export default function SocialSidebar() {
           <Icon className="h-6 w-6" />
           <span className="text-[11px] font-semibold md:hidden">{label}</span>
         </a>
-      ))}
+        );
+      })}
     </nav>
   );
 }

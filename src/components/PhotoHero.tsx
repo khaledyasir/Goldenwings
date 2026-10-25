@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Quote } from "lucide-react";
 import CtaButtons from "@/components/CtaButtons";
+import { getLang } from "@/lib/getLang";
 
 type PhotoHeroProps = {
   image: string;
@@ -26,12 +27,12 @@ type PhotoHeroProps = {
   bookLabel?: string;
 };
 
-export default function PhotoHero({
+export default async function PhotoHero({
   image,
   alt,
   objectPosition = "object-center",
   heightClass = "min-h-[400px] lg:min-h-[500px]",
-  textSide = "right",
+  textSide: arSide = "right",
   mobileAspect,
   alignTop = false,
   title,
@@ -41,6 +42,9 @@ export default function PhotoHero({
   hideCta = false,
   bookLabel,
 }: PhotoHeroProps) {
+  // English reads left to right, so the copy moves to the opposite side of the photo
+  const textSide = (await getLang()) === "en" ? (arSide === "right" ? "left" : "right") : arSide;
+  const wide = arSide === "left";
   return (
     <section
       className={`relative isolate overflow-hidden ${mobileAspect ? "max-lg:bg-navy" : ""}`}
@@ -78,17 +82,17 @@ export default function PhotoHero({
 
       <div
         className={`relative mx-auto flex px-4 py-12 lg:py-16 ${alignTop ? "lg:items-start" : "lg:items-center"} ${
-          textSide === "left" ? "max-w-none lg:px-[5%]" : "max-w-7xl lg:px-8"
+          wide && textSide === "left" ? "max-w-none lg:px-[5%]" : "max-w-7xl lg:px-8"
         } ${heightClass}`}
       >
         <div
-          className={`w-full text-center text-white lg:text-right ${
-            textSide === "right" ? "lg:ml-auto lg:w-[40%]" : "lg:mr-auto lg:w-[32%]"
+          className={`w-full text-center text-white lg:text-start ${
+            textSide === "right" ? "lg:ml-auto lg:w-[40%]" : `lg:mr-auto ${wide ? "lg:w-[32%]" : "lg:w-[40%]"}`
           }`}
         >
           <h1
             className={`text-3xl font-extrabold leading-tight drop-shadow-[0_2px_8px_rgba(10,25,47,0.8)] ${
-              textSide === "left" ? "lg:text-4xl" : "lg:text-5xl"
+              wide ? "lg:text-4xl" : "lg:text-5xl"
             }`}
           >
             {title}

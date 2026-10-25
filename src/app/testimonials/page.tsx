@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Quote } from "lucide-react";
 import PageHero from "@/components/PageHero";
+import { getLang } from "@/lib/getLang";
+import { t } from "@/lib/i18n";
 import { REVIEWS, type Review } from "@/lib/constants";
 
-export const metadata: Metadata = {
-  title: "آراء العملاء",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: t(await getLang(), "آراء العملاء", "Customer Reviews") };
+}
 
 // Same tile as the partners grid: the client shows up front, the review slides in on hover/focus (focus covers tapping on touch screens)
 const TILE =
@@ -27,13 +29,17 @@ function ReviewTile({ quote, name, company }: Review) {
 }
 
 /** Shown until real reviews are added: only the field names, no invented text */
-const PLACEHOLDER: Review = { name: "اسم العميل", company: "الشركة", quote: "نص التقييم" };
+const PLACEHOLDER = {
+  ar: { name: "اسم العميل", company: "الشركة", quote: "نص التقييم" },
+  en: { name: "Customer Name", company: "Company", quote: "Review text" },
+};
 
-export default function TestimonialsPage() {
-  const reviews = REVIEWS.length ? REVIEWS : Array.from({ length: 8 }, () => PLACEHOLDER);
+export default async function TestimonialsPage() {
+  const lang = await getLang();
+  const reviews = REVIEWS.length ? REVIEWS : Array.from({ length: 8 }, () => PLACEHOLDER[lang]);
   return (
     <main>
-      <PageHero title="آراء العملاء" />
+      <PageHero title={t(lang, "آراء العملاء", "Customer Reviews")} />
 
       <section className="bg-white py-12">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">

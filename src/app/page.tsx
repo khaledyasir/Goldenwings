@@ -4,10 +4,19 @@ import ValuePropsStrip from "@/components/ValuePropsStrip";
 import ServiceHighlights from "@/components/ServiceHighlights";
 import PartnersCarousel from "@/components/PartnersCarousel";
 import MapEmbed from "@/components/MapEmbed";
+import { getLang } from "@/lib/getLang";
+import { t } from "@/lib/i18n";
 
-export const metadata: Metadata = {
-  title: "نقل موظفين الشركات والمؤسسات والمنشئات الصناعية",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getLang();
+  return {
+    title: t(
+      lang,
+      "نقل موظفين الشركات والمؤسسات والمنشئات الصناعية",
+      "Industrial Establishments, Corporations & Companies' Employee Transportation",
+    ),
+  };
+}
 
 export default function Home() {
   return (

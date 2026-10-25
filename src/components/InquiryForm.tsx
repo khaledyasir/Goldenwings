@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type ReactNode } from "react";
 import { FLEET_TIERS, WHATSAPP_LINK } from "@/lib/constants";
+import { t, type Lang } from "@/lib/i18n";
 
 const FIELD =
   "w-full rounded-md bg-gray-200/70 px-4 py-3.5 text-navy outline-none ring-gold transition placeholder:text-navy/50 focus:bg-white focus:ring-2";
@@ -16,18 +17,29 @@ function Field({ label, children, wide }: { label: string; children: ReactNode; 
 }
 
 // ponytail: no backend yet, the request is sent as a WhatsApp message; swap handleSubmit for an API call + confirmation SMS/email when one exists
-export default function InquiryForm({ initialTier }: { initialTier?: string }) {
+export default function InquiryForm({ initialTier, lang }: { initialTier?: string; lang: Lang }) {
   const [f, setF] = useState({
     name: "",
     phone: "",
     email: "",
-    tier: FLEET_TIERS.find((t) => t === initialTier) ?? FLEET_TIERS[0],
+    tier: (FLEET_TIERS.find((x) => x.ar === initialTier) ?? FLEET_TIERS[0]).ar,
     start: "",
     end: "",
     from: "",
     to: "",
     message: "",
   });
+  const L = {
+    name: t(lang, "الاسم", "Full Name"),
+    phone: t(lang, "رقم الاتصال", "Contact Number"),
+    email: t(lang, "البريد الإلكتروني", "Email Address"),
+    tier: t(lang, "فئة الحافلة", "Bus Category"),
+    start: t(lang, "تاريخ بداية الرحلة", "Trip Start Date"),
+    end: t(lang, "تاريخ نهاية الرحلة", "Trip End Date"),
+    from: t(lang, "نقطة الانطلاق", "Departure Point"),
+    to: t(lang, "نقطة الوصول", "Destination"),
+    message: t(lang, "اكتب تعليقك", "Additional Comments"),
+  };
   const bind = (k: keyof typeof f) => ({
     value: f[k],
     onChange: (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value }),
@@ -35,16 +47,17 @@ export default function InquiryForm({ initialTier }: { initialTier?: string }) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    const tier = FLEET_TIERS.find((x) => x.ar === f.tier)![lang];
     const text = [
-      `الاسم: ${f.name}`,
-      `رقم الاتصال: ${f.phone}`,
-      f.email && `البريد الإلكتروني: ${f.email}`,
-      `فئة الحافلة: ${f.tier}`,
-      `تاريخ بداية الرحلة: ${f.start}`,
-      f.end && `تاريخ نهاية الرحلة: ${f.end}`,
-      `نقطة الانطلاق: ${f.from}`,
-      `نقطة الوصول: ${f.to}`,
-      f.message && `اكتب تعليقك: ${f.message}`,
+      `${L.name}: ${f.name}`,
+      `${L.phone}: ${f.phone}`,
+      f.email && `${L.email}: ${f.email}`,
+      `${L.tier}: ${tier}`,
+      `${L.start}: ${f.start}`,
+      f.end && `${L.end}: ${f.end}`,
+      `${L.from}: ${f.from}`,
+      `${L.to}: ${f.to}`,
+      f.message && `${L.message}: ${f.message}`,
     ]
       .filter(Boolean)
       .join("\n");
@@ -54,35 +67,37 @@ export default function InquiryForm({ initialTier }: { initialTier?: string }) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="الاسم" wide>
+        <Field label={L.name} wide>
           <input required className={FIELD} {...bind("name")} />
         </Field>
-        <Field label="رقم الاتصال">
-          <input required type="tel" dir="ltr" className={`${FIELD} text-right`} {...bind("phone")} />
+        <Field label={L.phone}>
+          <input required type="tel" dir="ltr" className={`${FIELD} ${lang === "ar" ? "text-right" : ""}`} {...bind("phone")} />
         </Field>
-        <Field label="البريد الإلكتروني">
-          <input type="email" dir="ltr" className={`${FIELD} text-right`} {...bind("email")} />
+        <Field label={L.email}>
+          <input type="email" dir="ltr" className={`${FIELD} ${lang === "ar" ? "text-right" : ""}`} {...bind("email")} />
         </Field>
-        <Field label="فئة الحافلة" wide>
+        <Field label={L.tier} wide>
           <select className={FIELD} {...bind("tier")}>
-            {FLEET_TIERS.map((t) => (
-              <option key={t}>{t}</option>
+            {FLEET_TIERS.map((x) => (
+              <option key={x.ar} value={x.ar}>
+                {x[lang]}
+              </option>
             ))}
           </select>
         </Field>
-        <Field label="تاريخ بداية الرحلة">
+        <Field label={L.start}>
           <input required type="date" className={FIELD} {...bind("start")} />
         </Field>
-        <Field label="تاريخ نهاية الرحلة">
+        <Field label={L.end}>
           <input type="date" min={f.start} className={FIELD} {...bind("end")} />
         </Field>
-        <Field label="نقطة الانطلاق">
+        <Field label={L.from}>
           <input required className={FIELD} {...bind("from")} />
         </Field>
-        <Field label="نقطة الوصول">
+        <Field label={L.to}>
           <input required className={FIELD} {...bind("to")} />
         </Field>
-        <Field label="اكتب تعليقك" wide>
+        <Field label={L.message} wide>
           <textarea rows={5} className={FIELD} {...bind("message")} />
         </Field>
       </div>
@@ -91,10 +106,14 @@ export default function InquiryForm({ initialTier }: { initialTier?: string }) {
         type="submit"
         className="mt-6 w-full rounded-md bg-gold-dark px-10 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-gold sm:w-56"
       >
-        إرسال
+        {t(lang, "إرسال", "Submit Booking")}
       </button>
       <p className="mt-4 text-sm font-semibold text-navy/70">
-        *ستصلك رسالة عند تأكيد الحجز يرجى التأكد من رقم الهاتف
+        {t(
+          lang,
+          "*ستصلك رسالة عند تأكيد الحجز يرجى التأكد من رقم الهاتف",
+          "*You will receive a message once your booking is confirmed. Please make sure your phone number is correct.",
+        )}
       </p>
     </form>
   );

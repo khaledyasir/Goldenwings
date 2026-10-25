@@ -2,9 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Phone } from "lucide-react";
 import { CONTACT_ICONS } from "@/components/contactIcons";
-import { BOOKING_HREF, EMAIL, PHONE_DISPLAY, PHONE_TEL, SERVICE_LINKS } from "@/lib/constants";
+import { BOOKING_HREF, COMPANY, EMAIL, PHONE_DISPLAY, PHONE_TEL, SERVICE_LINKS } from "@/lib/constants";
+import { getLang } from "@/lib/getLang";
+import { t, type Bi, type Lang } from "@/lib/i18n";
 
-const FOOTER_LINKS = [...SERVICE_LINKS, { label: "احجز الآن", href: BOOKING_HREF }];
+const FOOTER_LINKS = [...SERVICE_LINKS, { label: { ar: "احجز الآن", en: "Book Now" }, href: BOOKING_HREF }];
 
 function Column({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -16,13 +18,13 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
   );
 }
 
-function LinkList({ links }: { links: { label: string; href: string }[] }) {
+function LinkList({ links, lang }: { links: { label: Bi; href: string }[]; lang: Lang }) {
   return (
     <ul className="space-y-3">
       {links.map((link) => (
-        <li key={link.label}>
+        <li key={link.href}>
           <Link href={link.href} className="text-sm text-white/75 transition hover:text-gold">
-            {link.label}
+            {link.label[lang]}
           </Link>
         </li>
       ))}
@@ -30,16 +32,17 @@ function LinkList({ links }: { links: { label: string; href: string }[] }) {
   );
 }
 
-export default function Footer() {
+export default async function Footer() {
+  const lang = await getLang();
   return (
     <footer id="contact" className="relative mt-auto scroll-mt-20 bg-navy text-white">
       {/* Three even columns: services + book link, contact, brand (logo ends up on the left under RTL) */}
       <div className="relative mx-auto grid max-w-7xl gap-x-10 gap-y-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-3 lg:px-8">
-        <Column title="خدماتنا">
-          <LinkList links={FOOTER_LINKS} />
+        <Column title={t(lang, "خدماتنا", "Our Services")}>
+          <LinkList links={FOOTER_LINKS} lang={lang} />
         </Column>
 
-        <Column title="تواصل معنا">
+        <Column title={t(lang, "تواصل معنا", "Contact Us")}>
           <a
             href={PHONE_TEL}
             dir="ltr"
@@ -52,9 +55,11 @@ export default function Footer() {
             {EMAIL}
           </a>
           <div className="flex flex-wrap gap-3">
-            {CONTACT_ICONS.map(({ label, href, icon: Icon, external }) => (
+            {CONTACT_ICONS.map(({ label: bi, href, icon: Icon, external }) => {
+              const label = bi[lang];
+              return (
               <a
-                key={label}
+                key={bi.en}
                 href={href}
                 aria-label={label}
                 title={label}
@@ -63,14 +68,15 @@ export default function Footer() {
               >
                 <Icon className="h-5 w-5" />
               </a>
-            ))}
+              );
+            })}
           </div>
         </Column>
 
         <div className="flex items-start sm:col-span-2 lg:col-span-1 lg:justify-end">
           <Image
             src="/logo-v3.png"
-            alt="الأجنحة الذهبية لخدمة النقل"
+            alt={COMPANY[lang]}
             width={1212}
             height={573}
             className="h-20 w-auto"
@@ -80,7 +86,11 @@ export default function Footer() {
 
       <div className="border-t border-white/10 px-4 py-6 text-center text-sm text-white/75">
         <p>
-          حقوق الطبع والنشر © {new Date().getFullYear()} الأجنحة الذهبية لخدمة النقل وتاجير الحافلات. جميع الحقوق محفوظة.
+          {t(
+            lang,
+            `حقوق الطبع والنشر © ${new Date().getFullYear()} الأجنحة الذهبية لخدمة النقل وتاجير الحافلات. جميع الحقوق محفوظة.`,
+            `Copyright © ${new Date().getFullYear()} ${COMPANY.en}. All rights reserved.`,
+          )}
         </p>
         <a
           href="https://www.tenderjo.com/"

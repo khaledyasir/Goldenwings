@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import PartnersGrid from "@/components/PartnersGrid";
 import CtaButtons from "@/components/CtaButtons";
+import { getLang } from "@/lib/getLang";
+import { t } from "@/lib/i18n";
 
-export const metadata: Metadata = {
-  title: "الشركاء",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: t(await getLang(), "الشركاء", "Our Partners") };
+}
 
 export default function PartnersPage() {
   return (
