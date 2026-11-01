@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   Armchair,
@@ -59,6 +60,10 @@ export default async function FleetTiers() {
                 const isCar = gi === CARS_GROUP;
                 return (
                   <article key={name.ar} className="flex flex-col rounded-3xl bg-[#f4eee2] p-6 shadow-sm ring-1 ring-gold/20">
+                    {/* ponytail: one default bus photo for every tier, swap per tier when real photos arrive */}
+                    {!isCar && (
+                      <Image src="/images/fleet-large.png" alt={name[lang]} width={1600} height={880} className="-mx-6 -mt-6 mb-5 w-[calc(100%+3rem)] max-w-none rounded-t-3xl" />
+                    )}
                     <header className={`flex items-center justify-between gap-4 ${isCar ? "mb-6" : ""}`}>
                       <h4 className="text-3xl font-extrabold text-gold-dark">{name[lang]}</h4>
                     </header>
