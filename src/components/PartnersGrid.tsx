@@ -15,15 +15,15 @@ function PartnerTile({ name, src }: { name: string; src?: string }) {
           alt={name}
           width={200}
           height={100}
-          className="max-h-20 w-auto object-contain transition duration-300 group-hover:scale-95 group-hover:opacity-20 group-focus-visible:opacity-20"
+          className="max-h-20 w-auto object-contain transition duration-300 group-hover:scale-95 group-hover:opacity-20 group-focus:opacity-20"
         />
       ) : (
-        <span className="text-center text-xl font-extrabold text-navy/70 transition duration-300 group-hover:opacity-20 group-focus-visible:opacity-20">
+        <span className="text-center text-xl font-extrabold text-navy/70 transition duration-300 group-hover:opacity-20 group-focus:opacity-20">
           {name}
         </span>
       )}
       {/* Name slides in on hover/focus (focus covers tapping on touch screens) */}
-      <div className="absolute inset-0 flex translate-y-full flex-col items-center justify-center gap-1 bg-navy/95 px-3 text-center text-white transition duration-300 group-hover:translate-y-0 group-focus-visible:translate-y-0">
+      <div className="absolute inset-0 flex translate-y-full flex-col items-center justify-center gap-1 bg-navy/95 px-3 text-center text-white transition duration-300 group-hover:translate-y-0 group-focus:translate-y-0">
         <span className="text-sm font-bold text-gold">{name}</span>
       </div>
     </div>

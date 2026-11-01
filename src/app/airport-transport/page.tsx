@@ -10,7 +10,7 @@ const TITLE = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: TITLE[await getLang()] };
+  return { title: t(await getLang(), "نقل المطار والمعابر الحدودية", "Airport and Border Crossing Transportation") };
 }
 
 const DESTINATIONS = [

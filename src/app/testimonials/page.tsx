@@ -16,12 +16,12 @@ const TILE =
 function ReviewTile({ quote, name, company }: Review) {
   return (
     <div tabIndex={0} className={TILE}>
-      <div className="text-center transition duration-300 group-hover:scale-95 group-hover:opacity-20 group-focus-visible:opacity-20">
+      <div className="text-center transition duration-300 group-hover:scale-95 group-hover:opacity-20 group-focus:opacity-20">
         <Quote className="mx-auto mb-2 h-6 w-6 text-gold" />
         <p className="text-lg font-extrabold text-navy/80">{name}</p>
         <p className="text-sm text-gold-dark">{company}</p>
       </div>
-      <div className="absolute inset-0 flex translate-y-full items-center justify-center overflow-y-auto bg-navy/95 px-4 py-3 text-center text-sm leading-relaxed text-white transition duration-300 group-hover:translate-y-0 group-focus-visible:translate-y-0">
+      <div className="absolute inset-0 flex translate-y-full items-center justify-center overflow-y-auto bg-navy/95 px-4 py-3 text-center text-sm leading-relaxed text-white transition duration-300 group-hover:translate-y-0 group-focus:translate-y-0">
         {quote}
       </div>
     </div>

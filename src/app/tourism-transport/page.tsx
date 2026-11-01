@@ -7,11 +7,7 @@ import { t } from "@/lib/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: t(
-      await getLang(),
-      "نقل السياح. النقل السياحي المتخصص. نقل سياحي في الأردن",
-      "Specialized Tourism Transportation for Tourists and Groups",
-    ),
+    title: t(await getLang(), "النقل السياحي المتخصص", "Specialized Tourism Transportation"),
   };
 }
 

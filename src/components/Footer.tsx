@@ -75,7 +75,7 @@ export default async function Footer() {
 
         <div className="flex items-start sm:col-span-2 lg:col-span-1 lg:justify-end">
           <Image
-            src="/logo-v3.png"
+            src="/logo-header.png"
             alt={COMPANY[lang]}
             width={1212}
             height={573}
