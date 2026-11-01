@@ -39,6 +39,28 @@ const FEATURES = [
 
 const CARS_GROUP = FLEET_GROUPS.length - 1;
 
+export default async function FleetTiers() {
+  const lang = await getLang();
+  return (
+    <div className="mx-auto max-w-7xl px-4 lg:px-8">
+      <div className="mb-10 flex items-center justify-center gap-5">
+        <span className="h-0.5 w-16 rounded-full bg-gold" />
+        <h2 className="text-2xl font-extrabold text-navy lg:text-3xl">{t(lang, "الفئات", "Categories")}</h2>
+        <span className="h-0.5 w-16 rounded-full bg-gold" />
+      </div>
+
+      <div className="flex flex-col gap-14">
+        {FLEET_GROUPS.map(({ title, tiers }, gi) => (
+          <section key={title.en}>
+            <h3 className="mb-6 text-xl font-extrabold text-navy lg:text-2xl">{title[lang]}:</h3>
+            <div className={`grid gap-6 ${gi === CARS_GROUP ? "sm:grid-cols-2 lg:grid-cols-4" : "lg:grid-cols-2"}`}>
+              {tiers.map((name) => {
+                const seats = Number(name.ar.match(/\d+/)?.[0]);
+                const isCar = gi === CARS_GROUP;
+                return (
+                  <article key={name.ar} className="flex flex-col rounded-3xl bg-[#f4eee2] p-6 shadow-sm ring-1 ring-gold/20">
+                    <header className={`flex items-center justify-between gap-4 ${isCar ? "mb-6" : ""}`}>
+                      <h4 className="text-3xl font-extrabold text-gold-dark">{name[lang]}</h4>
                     </header>
 
                     {!isCar && (
