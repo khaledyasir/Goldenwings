@@ -1,38 +1,40 @@
 import Image from "next/image";
 import Link from "next/link";
-import { PARTNERS } from "@/lib/constants";
-import { getLang } from "@/lib/getLang";
-import { t } from "@/lib/i18n";
+import { editable, editableDoc, getGlobal, listDocs, media } from "@/lib/cms";
 
 const TILE = "flex h-24 w-52 shrink-0 items-center justify-center px-4 transition hover:scale-105";
 
 export default async function PartnersCarousel() {
-  const lang = await getLang();
+  const [home, partners, ed, edDoc] = await Promise.all([
+    getGlobal("home"),
+    listDocs("partners", { showOnHome: { equals: true } }),
+    editable("home"),
+    editableDoc(),
+  ]);
   return (
     <section className="bg-white pb-12 pt-20">
       <div className="mx-auto flex max-w-7xl items-center justify-center gap-5 px-4 lg:px-8">
         <span className="h-0.5 w-20 rounded-full bg-gold" />
-        <h2 className="text-2xl font-bold text-navy lg:text-3xl">{t(lang, "الشركاء", "Our Partners")}</h2>
+        <h2 className="text-2xl font-bold text-navy lg:text-3xl" {...ed("partnersTitle")}>
+          {home.partnersTitle}
+        </h2>
         <span className="h-0.5 w-20 rounded-full bg-gold" />
       </div>
 
       <div className="group mt-8 overflow-hidden py-2 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
         <div className="flex w-max animate-partners-scroll gap-8 group-hover:[animation-play-state:paused]">
-          {[...PARTNERS, ...PARTNERS].map(({ name, src }, i) => (
-            <Link key={`${name.en}-${i}`} href="/partners" className={TILE}>
-              {src ? (
-                <Image
-                  src={src}
-                  alt={name[lang]}
-                  width={200}
-                  height={100}
-                  className="max-h-20 w-auto object-contain"
-                />
-              ) : (
-                <span className="text-center text-xl font-extrabold text-navy/70">{name[lang]}</span>
-              )}
-            </Link>
-          ))}
+          {[...partners, ...partners].map((p, i) => {
+            const logo = media(p.logo);
+            return (
+              <Link key={`${p.id}-${i}`} href="/partners" className={TILE} {...edDoc("partners", p.id)}>
+                {logo ? (
+                  <Image src={logo.src} alt={p.name} width={200} height={100} className="max-h-20 w-auto object-contain" />
+                ) : (
+                  <span className="text-center text-xl font-extrabold text-navy/70">{p.name}</span>
+                )}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

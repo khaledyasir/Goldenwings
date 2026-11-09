@@ -3,9 +3,12 @@ import { Quote } from "lucide-react";
 import CtaButtons from "@/components/CtaButtons";
 import { getLang } from "@/lib/getLang";
 
+type Edit = (path: string, kind?: "text" | "image") => object;
+
 type PhotoHeroProps = {
-  image: string;
-  alt: string;
+  image: { src: string; alt: string } | null;
+  /** Visual edit markers for the page global's hero group */
+  ed?: Edit;
   /** Tailwind object-position utility, e.g. "object-[center_70%]", keeps the subject in frame as the hero height changes */
   objectPosition?: string;
   /** Taller hero for squarer source photos, so object-cover crops far less of the frame */
@@ -18,18 +21,18 @@ type PhotoHeroProps = {
   alignTop?: boolean;
   title: string;
   /** Gold line under the title */
-  subtitle?: string;
-  description?: string;
+  subtitle?: string | null;
+  description?: string | null;
   chip?: string;
   /** Hide the call / book buttons, for pages that show their own booking button right below */
   hideCta?: boolean;
   /** Text of the gold booking button */
-  bookLabel?: string;
+  bookLabel?: string | null;
 };
 
 export default async function PhotoHero({
   image,
-  alt,
+  ed = () => ({}),
   objectPosition = "object-center",
   heightClass = "min-h-[400px] lg:min-h-[500px]",
   textSide: arSide = "right",
@@ -56,15 +59,11 @@ export default async function PhotoHero({
             : "absolute inset-0"
         }
         style={mobileAspect ? { aspectRatio: mobileAspect } : undefined}
+        {...ed("hero.image", "image")}
       >
-        <Image
-          src={image}
-          alt={alt}
-          fill
-          priority
-          sizes="100vw"
-          className={`object-cover ${objectPosition}`}
-        />
+        {image && (
+          <Image src={image.src} alt={image.alt} fill priority sizes="100vw" className={`object-cover ${objectPosition}`} />
+        )}
         {/* Scrim gradient rather than a solid panel, keeps the bus visible while the text side stays dark enough to read */}
         <div
           className={`absolute inset-0 bg-gradient-to-r ${mobileAspect ? "max-lg:hidden" : ""} ${
@@ -94,18 +93,19 @@ export default async function PhotoHero({
             className={`text-3xl font-extrabold leading-tight drop-shadow-[0_2px_8px_rgba(10,25,47,0.8)] ${
               wide ? "lg:text-4xl" : "lg:text-5xl"
             }`}
+            {...ed("hero.title")}
           >
             {title}
           </h1>
 
           {subtitle && (
-            <p className="mt-3 text-xl font-bold text-gold drop-shadow-[0_1px_6px_rgba(10,25,47,0.9)] lg:text-2xl">
+            <p className="mt-3 text-xl font-bold text-gold drop-shadow-[0_1px_6px_rgba(10,25,47,0.9)] lg:text-2xl" {...ed("hero.subtitle")}>
               {subtitle}
             </p>
           )}
 
           {description && (
-            <p className="mt-5 text-base leading-loose text-white/90 drop-shadow-[0_1px_6px_rgba(10,25,47,0.9)] lg:text-lg">
+            <p className="mt-5 text-base leading-loose text-white/90 drop-shadow-[0_1px_6px_rgba(10,25,47,0.9)] lg:text-lg" {...ed("hero.description")}>
               {description}
             </p>
           )}

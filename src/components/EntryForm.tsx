@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { ENTRY_OPTIONS, WHATSAPP_LINK } from "@/lib/constants";
-import { t, type Bi, type Lang } from "@/lib/i18n";
+import { startTransition, useActionState, useEffect, useRef, type ReactNode } from "react";
+import { submitEntry, type EntryState } from "@/app/(site)/entries/actions";
+import type { EntriesPage } from "@/payload-types";
 
 const FIELD =
-  "w-full rounded-md bg-gray-200/70 px-4 py-3.5 text-navy outline-none ring-gold transition placeholder:text-navy/50 focus:bg-white focus:ring-2";
+  "w-full rounded-md bg-gray-200/70 px-4 py-3.5 text-navy outline-none ring-gold transition placeholder:text-navy/50 focus:bg-white focus:ring-2 aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-red-500";
 
-function Field({ label, children, wide }: { label: string; children: ReactNode; wide?: boolean }) {
+function Field({ label, children, wide }: { label?: string | null; children: ReactNode; wide?: boolean }) {
   return (
     <label className={`block ${wide ? "sm:col-span-2" : ""}`}>
       <span className="mb-1.5 block text-sm font-semibold text-navy/70">{label}</span>
@@ -16,73 +16,31 @@ function Field({ label, children, wide }: { label: string; children: ReactNode; 
   );
 }
 
-const SELECTS = [
-  { key: "movement", label: { ar: "الحركة", en: "Activity" } },
-  { key: "type", label: { ar: "النوع", en: "Service Type" } },
-  { key: "client", label: { ar: "العميل", en: "Client" } },
-  { key: "trip", label: { ar: "الرحلة", en: "Trip" } },
-] as const;
-const SELECTS_2 = [
-  { key: "bus", label: { ar: "رقم الحافلة", en: "Bus Number" } },
-  { key: "driver", label: { ar: "السائق", en: "Driver" } },
-  { key: "authorization", label: { ar: "رقم التفويض", en: "Authorization Number" } },
-] as const;
-const DATE: Bi = { ar: "التاريخ", en: "Date" };
-const NOTE: Bi = { ar: "بيان", en: "Statement" };
+type Lists = "movement" | "type" | "client" | "trip" | "bus" | "driver" | "authorization";
+type Props = {
+  options: Record<Lists, { id: number; label: string }[]>;
+  copy: Pick<EntriesPage, "labels" | "success" | "error">;
+};
 
-const newCaptcha = () => ({ a: 1 + Math.floor(Math.random() * 9), b: 1 + Math.floor(Math.random() * 9) });
+export default function EntryForm({ options, copy }: Props) {
+  const [state, action, pending] = useActionState<EntryState, FormData>(submitEntry, { status: "idle" });
+  const form = useRef<HTMLFormElement>(null);
+  const L = copy.labels ?? {};
+  const bad = (k: string) => state.status === "error" && state.fields.includes(k as never);
+  // A saved entry clears the form for the next one
+  useEffect(() => {
+    if (state.status === "ok") form.current?.reset();
+  }, [state]);
 
-// ponytail: no backend yet, the entry is sent as a WhatsApp message like the booking form; swap handleSubmit for an API call when one exists. The captcha is client-side only, so it stops casual spam, not bots, move the check server-side with the API.
-export default function EntryForm({ lang }: { lang: Lang }) {
-  const [f, setF] = useState({
-    movement: "",
-    type: "",
-    client: "",
-    trip: "",
-    date: "",
-    bus: "",
-    driver: "",
-    authorization: "",
-    note: "",
-  });
-  // Random numbers are picked after mount so server and client HTML match
-  const [captcha, setCaptcha] = useState<{ a: number; b: number } | null>(null);
-  const [answer, setAnswer] = useState("");
-  const [wrong, setWrong] = useState(false);
-  useEffect(() => setCaptcha(newCaptcha()), []);
-
-  const bind = (k: keyof typeof f) => ({
-    value: f[k],
-    onChange: (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value }),
-  });
-
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (!captcha || Number(answer) !== captcha.a + captcha.b) {
-      setWrong(true);
-      setAnswer("");
-      setCaptcha(newCaptcha());
-      return;
-    }
-    const labels = [...SELECTS, { key: "date", label: DATE }, ...SELECTS_2, { key: "note", label: NOTE }] as const;
-    const text = labels
-      .map(({ key, label }) => {
-        const opt = ENTRY_OPTIONS[key]?.find((o) => o.ar === f[key]);
-        return `${label[lang]}: ${opt ? opt[lang] : f[key]}`;
-      })
-      .join("\n");
-    window.open(`${WHATSAPP_LINK}?text=${encodeURIComponent(text)}`, "_blank");
-  }
-
-  const select = ({ key, label }: { key: keyof typeof f & string; label: Bi }) => (
-    <Field key={key} label={label[lang]}>
-      <select required className={FIELD} {...bind(key)}>
+  const select = (key: Lists) => (
+    <Field key={key} label={L[key]}>
+      <select name={key} required defaultValue="" aria-invalid={bad(key)} className={FIELD}>
         <option value="" disabled>
-          {t(lang, "اختر", "Select")}
+          {L.select}
         </option>
-        {ENTRY_OPTIONS[key].map((o) => (
-          <option key={o.ar} value={o.ar}>
-            {o[lang]}
+        {options[key].map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.label}
           </option>
         ))}
       </select>
@@ -90,41 +48,37 @@ export default function EntryForm({ lang }: { lang: Lang }) {
   );
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      ref={form}
+      onSubmit={(e) => {
+        e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        startTransition(() => action(data));
+      }}
+    >
       <div className="grid gap-5 sm:grid-cols-2">
-        {SELECTS.map(select)}
-        <Field label={DATE[lang]}>
-          <input required type="date" className={FIELD} {...bind("date")} />
+        {(["movement", "type", "client", "trip"] as const).map(select)}
+        <Field label={L.date}>
+          <input name="date" required type="date" aria-invalid={bad("date")} className={FIELD} />
         </Field>
-        {SELECTS_2.map(select)}
-        <Field label={NOTE[lang]} wide>
-          <textarea rows={4} className={FIELD} {...bind("note")} />
-        </Field>
-        <Field label={
-            captcha
-              ? t(lang, `تحقق: كم ناتج ${captcha.a} + ${captcha.b} ؟`, `Verify: what is ${captcha.a} + ${captcha.b}?`)
-              : t(lang, "تحقق", "Verify")
-          } wide>
-          <input
-            required
-            inputMode="numeric"
-            dir="ltr"
-            className={`${FIELD} ${lang === "ar" ? "text-right" : ""}`}
-            value={answer}
-            onChange={(e) => {
-              setAnswer(e.target.value);
-              setWrong(false);
-            }}
-          />
-          {wrong && <span className="mt-1.5 block text-sm font-semibold text-red-600">{t(lang, "الرقم غير صحيح، حاول مرة أخرى", "Incorrect number, please try again")}</span>}
+        {(["bus", "driver", "authorization"] as const).map(select)}
+        <Field label={L.statement} wide>
+          <textarea name="statement" rows={4} maxLength={2000} className={FIELD} />
         </Field>
       </div>
 
+      {state.status !== "idle" && (
+        <p role={state.status === "ok" ? "status" : "alert"} className={`mt-4 text-sm font-semibold ${state.status === "ok" ? "text-green-700" : "text-red-600"}`}>
+          {state.status === "ok" ? copy.success : copy.error}
+        </p>
+      )}
+
       <button
         type="submit"
-        className="mt-6 w-full rounded-md bg-gold-dark px-10 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-gold sm:w-56"
+        disabled={pending}
+        className="mt-6 w-full rounded-md bg-gold-dark px-10 py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-gold disabled:opacity-60 sm:w-56"
       >
-        {t(lang, "إرسال", "Send")}
+        {L.submit}
       </button>
     </form>
   );

@@ -1,98 +1,91 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Armchair,
-  ArrowLeft,
-  BriefcaseMedical,
-  Cctv,
-  Fan,
-  Lightbulb,
-  PlugZap,
-  Refrigerator,
-  ShieldCheck,
-  Snowflake,
-  Toilet,
-  Tv,
-  Usb,
-  Volume2,
-  Wifi,
-} from "lucide-react";
-import { BOOKING_HREF, FLEET_GROUPS } from "@/lib/constants";
-import { getLang } from "@/lib/getLang";
-import { t } from "@/lib/i18n";
-
-// ponytail: one shared feature list for every bus tier, taken from the reference cards (VIP 30 / VIP 49), confirm per vehicle and add a per-tier override where one differs
-const FEATURES = [
-  { icon: Tv, text: { ar: "شاشات", en: "Screens" } },
-  { icon: Wifi, text: { ar: "إنترنت", en: "Internet" } },
-  { icon: Volume2, text: { ar: "نظام صوتي", en: "Sound system" } },
-  { icon: Snowflake, text: { ar: "تبريد / تسخين", en: "Cooling / Heating" } },
-  { icon: Fan, text: { ar: "نظام تهوية", en: "Ventilation system" } },
-  { icon: Usb, text: { ar: "منفذ شاحن USB", en: "USB charging port" } },
-  { icon: PlugZap, text: { ar: "قابس كهربائي 220V", en: "220V power outlet" } },
-  { icon: Lightbulb, text: { ar: "إنارة", en: "Lighting" } },
-  { icon: Refrigerator, text: { ar: "ثلاجة", en: "Refrigerator" } },
-  { icon: Cctv, text: { ar: "كاميرات مراقبة", en: "CCTV cameras" } },
-  { icon: ShieldCheck, text: { ar: "معدات الأمان والسلامة", en: "Safety and security equipment" } },
-  { icon: BriefcaseMedical, text: { ar: "إسعافات أولية", en: "First aid" } },
-  { icon: Toilet, text: { ar: "دورة مياه", en: "Restroom" } },
-];
-
-const CARS_GROUP = FLEET_GROUPS.length - 1;
+import { Armchair, ArrowLeft } from "lucide-react";
+import { editable, editableDoc, getGlobal, getSettings, listDocs, media } from "@/lib/cms";
+import { iconFor } from "@/lib/icons";
+import type { Amenity, Vehicle } from "@/payload-types";
 
 export default async function FleetTiers() {
-  const lang = await getLang();
+  const [page, s, categories, vehicles, ed, edDoc] = await Promise.all([
+    getGlobal("fleet-page"),
+    getSettings(),
+    listDocs("fleet-categories"),
+    listDocs("vehicles"),
+    editable("fleet-page"),
+    editableDoc(),
+  ]);
+  const seats = (n: number) => ((n > 10 ? page.seatsLabel : page.seatsLabelFew) || page.seatsLabel || "{n}").replace("{n}", String(n));
+
   return (
     <div className="mx-auto max-w-7xl px-4 lg:px-8">
       <div className="mb-10 flex items-center justify-center gap-5">
         <span className="h-0.5 w-16 rounded-full bg-gold" />
-        <h2 className="text-2xl font-extrabold text-navy lg:text-3xl">{t(lang, "الفئات", "Categories")}</h2>
+        <h2 className="text-2xl font-extrabold text-navy lg:text-3xl" {...ed("categoriesHeading")}>
+          {page.categoriesHeading}
+        </h2>
         <span className="h-0.5 w-16 rounded-full bg-gold" />
       </div>
 
       <div className="flex flex-col gap-14">
-        {FLEET_GROUPS.map(({ title, tiers }, gi) => (
-          <section key={title.en}>
-            <h3 className="mb-6 text-xl font-extrabold text-navy lg:text-2xl">{title[lang]}:</h3>
-            <div className={`grid gap-6 ${gi === CARS_GROUP ? "sm:grid-cols-2 lg:grid-cols-4" : "lg:grid-cols-2"}`}>
-              {tiers.map((name) => {
-                const seats = Number(name.ar.match(/\d+/)?.[0]);
-                const isCar = gi === CARS_GROUP;
-                return (
-                  <article key={name.ar} className="flex flex-col rounded-3xl bg-[#f4eee2] p-6 shadow-sm ring-1 ring-gold/20">
-                    {/* ponytail: one default bus photo for every tier, swap per tier when real photos arrive */}
-                    {!isCar && (
-                      <Image src="/images/fleet-large.png" alt={name[lang]} width={1600} height={880} className="-mx-6 -mt-6 mb-5 w-[calc(100%+3rem)] max-w-none rounded-t-3xl" />
-                    )}
-                    <header className={`flex items-center justify-between gap-4 ${isCar ? "mb-6" : ""}`}>
-                      <h4 className="text-3xl font-extrabold text-gold-dark">{name[lang]}</h4>
-                    </header>
+        {categories.map((cat) => {
+          const items = vehicles.filter((v) => (typeof v.category === "object" ? v.category?.id : v.category) === cat.id);
+          if (!items.length) return null;
+          const compact = cat.layout === "compact";
+          return (
+            <section key={cat.id} {...edDoc("fleet-categories", cat.id)}>
+              <h3 className="mb-6 text-xl font-extrabold text-navy lg:text-2xl">{cat.title}:</h3>
+              <div className={`grid gap-6 ${compact ? "sm:grid-cols-2 lg:grid-cols-4" : "lg:grid-cols-2"}`}>
+                {items.map((v: Vehicle) => {
+                  const img = media(v.image);
+                  const amenities = (v.amenities ?? []).filter((a): a is Amenity => typeof a === "object" && !!a);
+                  return (
+                    <article key={v.id} className="flex flex-col rounded-3xl bg-[#f4eee2] p-6 shadow-sm ring-1 ring-gold/20" {...edDoc("vehicles", v.id)}>
+                      {!compact && img && (
+                        <Image
+                          src={img.src}
+                          alt={v.name}
+                          width={img.width}
+                          height={img.height}
+                          className="-mx-6 -mt-6 mb-5 w-[calc(100%+3rem)] max-w-none rounded-t-3xl"
+                        />
+                      )}
+                      <header className={`flex items-center justify-between gap-4 ${compact ? "mb-6" : ""}`}>
+                        <h4 className="text-3xl font-extrabold text-gold-dark">{v.name}</h4>
+                      </header>
+                      {v.description && <p className="mt-3 text-sm leading-relaxed text-navy/80">{v.description}</p>}
 
-                    {!isCar && (
-                      <ul className="mb-6 mt-5 grid gap-x-8 sm:grid-cols-2">
-                        {[{ icon: Armchair, text: t(lang, `${seats} ${seats > 10 ? "مقعد" : "مقاعد"}`, `${seats} seats`) }, ...FEATURES.map((f) => ({ icon: f.icon, text: f.text[lang] }))].map(({ icon: Icon, text }) => (
-                          <li key={text} className="flex items-center gap-3 border-b border-gold/20 py-3 text-sm font-semibold text-navy">
-                            <Icon className="h-6 w-6 shrink-0 text-gold-dark" strokeWidth={1.4} />
-                            {text}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                      {!compact && (
+                        <ul className="mb-6 mt-5 grid gap-x-8 sm:grid-cols-2">
+                          {[
+                            ...(v.capacity ? [{ key: "seats", Icon: Armchair, text: seats(v.capacity) }] : []),
+                            ...amenities.map((a) => ({ key: String(a.id), Icon: iconFor(a.icon), text: a.name })),
+                          ].map(({ key, Icon, text }) => (
+                            <li key={key} className="flex items-center gap-3 border-b border-gold/20 py-3 text-sm font-semibold text-navy">
+                              <Icon className="h-6 w-6 shrink-0 text-gold-dark" strokeWidth={1.4} />
+                              {text}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
 
-                    <Link
-                      href={`${BOOKING_HREF}?tier=${encodeURIComponent(name.ar)}`}
-                      className="group mt-auto flex items-center justify-center gap-2 rounded-lg bg-navy px-5 py-3 text-sm font-bold text-gold transition hover:bg-navy-light"
-                    >
-                      {t(lang, "احجز الآن", "Book Now")}
-                      <ArrowLeft className="h-4 w-4 transition ltr:rotate-180 group-hover:-translate-x-1 ltr:group-hover:translate-x-1" />
-                    </Link>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-        ))}
+                      {v.bookable !== false && (
+                        <Link
+                          href={`/booking?vehicle=${v.id}`}
+                          className="group mt-auto flex items-center justify-center gap-2 rounded-lg bg-navy px-5 py-3 text-sm font-bold text-gold transition hover:bg-navy-light"
+                        >
+                          {s.labels?.bookNow}
+                          <ArrowLeft className="h-4 w-4 transition ltr:rotate-180 group-hover:-translate-x-1 ltr:group-hover:translate-x-1" />
+                        </Link>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );
 }
+

@@ -47,3 +47,10 @@ next-env.d.ts
 /site screenshots.rar
 .claude/
 .claude-flow/
+
+# local dev database and uploads (production uses hosted Postgres + Vercel Blob)
+/.data/
+/media/
+!.env.example
+/.dev*.log
+/.wt-main/

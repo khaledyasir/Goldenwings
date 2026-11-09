@@ -2,26 +2,50 @@
   "name": "golden-wings",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:dev": "node scripts/dev-db.mjs",
+    "payload": "payload --use-swc",
+    "generate": "payload generate:types --use-swc && payload generate:importmap --use-swc",
+    "seed": "payload run src/seed/cli.ts --use-swc",
+    "owner:create": "payload run scripts/create-owner.ts --use-swc",
+    "migrate": "payload migrate --use-swc",
+    "vercel-build": "payload migrate --use-swc && next build",
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@payloadcms/db-postgres": "^3.93.0",
+    "@payloadcms/email-nodemailer": "^3.93.0",
+    "@payloadcms/next": "^3.93.0",
+    "@payloadcms/storage-vercel-blob": "^3.93.0",
+    "@payloadcms/translations": "^3.93.0",
+    "@payloadcms/ui": "^3.93.0",
+    "graphql": "^16.15.0",
     "lucide-react": "^1.47.0",
     "next": "16.3.5",
+    "payload": "^3.93.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
+    "@swc-node/register": "^1.12.1",
+    "@swc/core": "^1.16.22",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "embedded-postgres": "^18.6.0-beta.19",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "playwright-core": "^1.65.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

@@ -1,6 +1,6 @@
 import { Mail, Phone, MessageCircle } from "lucide-react";
-import type { Bi } from "@/lib/i18n";
-import { EMAIL, FACEBOOK_LINK, INSTAGRAM_LINK, PHONE_TEL, WHATSAPP_LINK } from "@/lib/constants";
+import { contactLinks } from "@/lib/cms";
+import type { Setting } from "@/payload-types";
 
 // lucide-react v1 dropped brand icons, so Instagram/Facebook are inline SVGs
 export function InstagramIcon({ className }: { className?: string }) {
@@ -21,11 +21,15 @@ export function FacebookIcon({ className }: { className?: string }) {
   );
 }
 
-/** Gold, clickable icons in the order given in the content document */
-export const CONTACT_ICONS: { label: Bi; href: string; icon: React.ComponentType<{ className?: string }>; external: boolean }[] = [
-  { label: { ar: "اتصال", en: "Call" }, href: PHONE_TEL, icon: Phone, external: false },
-  { label: { ar: "واتساب", en: "WhatsApp" }, href: WHATSAPP_LINK, icon: MessageCircle, external: true },
-  { label: { ar: "البريد", en: "Email" }, href: `mailto:${EMAIL}`, icon: Mail, external: false },
-  { label: { ar: "فيسبوك", en: "Facebook" }, href: FACEBOOK_LINK, icon: FacebookIcon, external: true },
-  { label: { ar: "انستا", en: "Instagram" }, href: INSTAGRAM_LINK, icon: InstagramIcon, external: true },
-];
+/** Gold, clickable icons in the order given in the content document. Social links without a URL are left out. */
+export function contactIcons(s: Setting) {
+  const links = contactLinks(s);
+  const l = s.labels ?? {};
+  return [
+    { key: "call", label: l.call ?? "", href: links.tel, icon: Phone, external: false },
+    { key: "whatsapp", label: l.whatsapp ?? "", href: links.whatsapp, icon: MessageCircle, external: true },
+    { key: "email", label: l.email ?? "", href: links.mail, icon: Mail, external: false },
+    { key: "facebook", label: l.facebook ?? "", href: s.facebookUrl ?? "", icon: FacebookIcon, external: true },
+    { key: "instagram", label: l.instagram ?? "", href: s.instagramUrl ?? "", icon: InstagramIcon, external: true },
+  ].filter((c) => c.href);
+}
