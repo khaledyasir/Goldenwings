@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   const { docs } = await payload.find({
     collection,
     depth: 1,
-    limit: 10_000,
+    limit: 0, // everything: a silently truncated export would hide records
     pagination: false,
     sort: "-createdAt",
     overrideAccess: false,

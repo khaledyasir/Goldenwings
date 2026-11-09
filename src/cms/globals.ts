@@ -18,7 +18,8 @@ const page = (slug: string, label: { ar: string; en: string }, path: string, fie
   slug,
   label,
   access,
-  versions: { drafts: true, max: 50 },
+  // validate drafts too: restoring a version publishes it without re-validating
+  versions: { drafts: { validate: true }, max: 50 },
   admin: {
     group: L("صفحات الموقع", "Website pages"),
     hidden,
@@ -34,7 +35,8 @@ export const Settings: GlobalConfig = {
   slug: "settings",
   label: L("إعدادات الموقع العامة", "Site settings"),
   access,
-  versions: { drafts: true, max: 50 },
+  // validate drafts too: restoring a version publishes it without re-validating
+  versions: { drafts: { validate: true }, max: 50 },
   admin: { group: L("الإعدادات", "Settings"), hidden, preview: () => "/api/edit-mode?path=/" },
   fields: [
     {

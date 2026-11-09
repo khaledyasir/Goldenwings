@@ -51,3 +51,16 @@ test("CSV cells are quoted and formulas defused", () => {
   assert.equal(csvCell("+962"), `"'+962"`);
   assert.equal(csvCell(null), '""');
 });
+
+test("CMS link validator: site paths and web/tel/mail links only", async () => {
+  const { HREF } = await import("../src/cms/fields.ts");
+  for (const ok of ["/fleet", "/#services", "/booking?vehicle=3", "https://wa.me/962", "tel:+962", "mailto:a@b.c"]) assert.ok(HREF.test(ok), ok);
+  for (const bad of ["//evil.com", String.raw`/\evil.com`, "javascript:alert(1)", "data:text/html,x", "fleet", "/ space"]) assert.ok(!HREF.test(bad), bad);
+});
+
+test("IPv6 rate-limit buckets are per /64", async () => {
+  const { ipBucket } = await import("../src/lib/bookings.ts");
+  assert.equal(ipBucket("2001:db8:1:2:aaaa::1"), ipBucket("2001:db8:1:2:bbbb::9"));
+  assert.notEqual(ipBucket("2001:db8:1:2::1"), ipBucket("2001:db8:1:3::1"));
+  assert.equal(ipBucket("203.0.113.7"), "203.0.113.7");
+});

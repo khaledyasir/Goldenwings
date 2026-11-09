@@ -139,6 +139,17 @@ BASE_URL=http://localhost:3000 OWNER_EMAIL=... OWNER_PASSWORD=... BROWSER="path/
 - Production Postgres, the Blob token, `PAYLOAD_SECRET` and `SERVER_URL`.
 - SMTP, for password-reset email and booking notifications. Without it, emails are written to the server log.
 
+**Security trade-offs accepted (from the security review), with the upgrade path:**
+
+- **Login lockout:** five wrong passwords lock an account for 15 minutes. Anyone who knows the owner's email could keep it locked. Add edge rate-limiting on `/api/users/login` (Vercel Firewall rule) if that ever happens.
+- **Booking floods:**
+  - The limit is 5 requests per IP (IPv6 per /64) every 10 minutes.
+  - Site-wide, requests from 100 per 10 minutes are stored but flagged as suspected spam, and no email is sent for them.
+  - Above 1,000 per 10 minutes, requests are refused.
+  - Adding a challenge such as Cloudflare Turnstile for unusual volume would remove the trade-off, but needs an account.
+- **Images:** `next.config.ts` allows images from any `*.public.blob.vercel-storage.com` host. Once the Blob store exists, pin it to that store's hostname.
+- **Document locks:** any signed-in user can create or clear Payload's "document is being edited" locks. This is a nuisance only, with no data access.
+
 **Deliberately not built:**
 
 - Online payments.

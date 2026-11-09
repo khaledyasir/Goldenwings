@@ -32,13 +32,16 @@ export const group = (name: string, fields: Field[], label?: string): GroupField
 export const seo = (): GroupField =>
   group("seo", [text("title"), area("description")], "SEO");
 
+/** Site path (not `//host` or `/\host`, which browsers treat as another site), http(s), tel: or mailto: */
+export const HREF = /^(\/(?![/\\])\S*|https?:\/\/\S+|tel:\S+|mailto:\S+)$/;
+
 /** A link target: a site path such as /fleet or a full https URL */
 export const href = (name = "href", required = true): TextField => ({
   name,
   type: "text",
   required,
   validate: (v: unknown) =>
-    !v && !required ? true : typeof v === "string" && /^(\/[^\s]*|https?:\/\/\S+|tel:\S+|mailto:\S+)$/.test(v)
+    !v && !required ? true : typeof v === "string" && HREF.test(v)
       ? true
       : "Use a path like /fleet or a full https:// link",
 });

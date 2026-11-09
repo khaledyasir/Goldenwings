@@ -64,8 +64,10 @@ export function newReference(now = new Date()) {
   return `GW-${ymd}-${Array.from({ length: 5 }, () => REF_CHARS[randomInt(REF_CHARS.length)]).join("")}`;
 }
 
+/** IPv6 is bucketed by /64: one subscriber usually controls a whole /64, so per-address limits would be moot */
+export const ipBucket = (ip: string) => (ip.includes(":") ? ip.split(":").slice(0, 4).join(":") : ip);
 export const hashIp = (ip: string) =>
-  createHash("sha256").update(`${process.env.PAYLOAD_SECRET ?? ""}:${ip}`).digest("hex").slice(0, 32);
+  createHash("sha256").update(`${process.env.PAYLOAD_SECRET ?? ""}:${ipBucket(ip)}`).digest("hex").slice(0, 32);
 
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_MAX = 5;

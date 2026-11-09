@@ -123,3 +123,14 @@ test("media still in use cannot be deleted", async () => {
   const settings = await payload.findGlobal({ slug: "settings", depth: 0 });
   await assert.rejects(payload.delete({ collection: "media", id: settings.logo as number }), /still used/);
 });
+
+test("trashed content is hidden from visitors even with trash=true; entry lists are owner-only", async () => {
+  const cat = (await payload.find({ collection: "trip-categories", limit: 1 })).docs[0];
+  const trip = await payload.create({ collection: "trips", data: { name: "Trashed trip", category: cat.id, _status: "published" } });
+  await payload.update({ collection: "trips", id: trip.id, data: { deletedAt: new Date().toISOString() } });
+  const anon = await payload.find({ collection: "trips", trash: true, overrideAccess: false, where: { id: { equals: trip.id } } });
+  assert.equal(anon.totalDocs, 0, "visitor read a trashed trip");
+  for (const role of ["editor", "staff"]) await assert.rejects(payload.find({ collection: "entry-options", ...as(role) }), `${role} read entry lists`);
+  await assert.rejects(payload.findVersions({ collection: "trips", ...as("staff") }), "staff read content history");
+  await payload.delete({ collection: "trips", id: trip.id, trash: true });
+});

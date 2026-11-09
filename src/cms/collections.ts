@@ -1,6 +1,6 @@
 import type { CollectionConfig, Field, Payload } from "payload";
 import { APIError } from "payload";
-import { isContentTeam, isLoggedIn, isOwner, ownerField, publishedOrTeam } from "./access";
+import { isContentTeam, isOwner, ownerField, publishedLiveOrTeam } from "./access";
 import { area, href, icon, image, list, text } from "./fields";
 
 const L = (ar: string, en: string) => ({ ar, en });
@@ -8,7 +8,9 @@ const CONTENT = L("محتوى الموقع", "Website content");
 const OPS = L("العمليات", "Operations");
 
 const contentAccess = {
-  read: publishedOrTeam,
+  read: publishedLiveOrTeam,
+  // Explicit: Payload's default would let any signed-in user (staff too) read drafts and history
+  readVersions: isContentTeam,
   create: isContentTeam,
   update: isContentTeam,
   delete: isContentTeam,
@@ -402,7 +404,8 @@ export const EntryOptions: CollectionConfig = {
     defaultColumns: ["label", "list", "active"],
     hidden: ({ user }) => (user as { role?: string } | null)?.role !== "owner",
   },
-  access: { read: isLoggedIn, create: isOwner, update: isOwner, delete: isOwner },
+  // Owner only: client/driver/authorization lists are operational data. The entries form reads them server-side.
+  access: { read: isOwner, create: isOwner, update: isOwner, delete: isOwner },
   fields: [
     {
       name: "list",
