@@ -1,3 +1,4 @@
+import { RowLabel as RowLabel_2a8457604a4c138624cc696843a5e980 } from '@/cms/admin/RowLabel'
 import { Icon as Icon_cbce226e6b44cd430d750067edeca5e2 } from '@/cms/admin/Brand'
 import { Logo as Logo_cbce226e6b44cd430d750067edeca5e2 } from '@/cms/admin/Brand'
 import { HeaderActions as HeaderActions_377e240e77dabcac34356a4b67ee2be7 } from '@/cms/admin/HeaderActions'
@@ -8,6 +9,7 @@ import { VercelBlobClientUploadHandler as VercelBlobClientUploadHandler_16c82c5e
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "@/cms/admin/RowLabel#RowLabel": RowLabel_2a8457604a4c138624cc696843a5e980,
   "@/cms/admin/Brand#Icon": Icon_cbce226e6b44cd430d750067edeca5e2,
   "@/cms/admin/Brand#Logo": Logo_cbce226e6b44cd430d750067edeca5e2,
   "@/cms/admin/HeaderActions#HeaderActions": HeaderActions_377e240e77dabcac34356a4b67ee2be7,

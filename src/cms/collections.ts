@@ -123,12 +123,17 @@ export async function mediaUsage(payload: Payload, id: number | string): Promise
 export const Media: CollectionConfig = {
   slug: "media",
   labels: { singular: L("صورة", "Image"), plural: L("مكتبة الصور", "Media library") },
-  admin: { group: CONTENT, hidden: hiddenFromStaff, listSearchableFields: ["filename", "alt"] },
+  admin: { group: CONTENT, hidden: hiddenFromStaff, useAsTitle: "filename", listSearchableFields: ["filename", "alt"] },
   access: { read: () => true, create: isContentTeam, update: isContentTeam, delete: isContentTeam },
   upload: {
     // No SVG: it can carry script and the files are served from the site's own origin
     mimeTypes: ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"],
     focalPoint: true,
+    // Admin thumbnails through Next's image optimizer: originals can be several MB
+    adminThumbnail: ({ doc }) =>
+      typeof doc.url === "string"
+        ? `/_next/image?url=${encodeURIComponent(doc.url.replace(/^https?:\/\/[^/]+(?=\/api\/media\/)/, ""))}&w=384&q=75`
+        : null,
   },
   hooks: {
     beforeDelete: [
@@ -229,18 +234,19 @@ export const Trips = content({
       type: "collapsible",
       label: L("الموعد والسعر (للرحلات المجدولة فقط)", "Schedule and price (scheduled trips only)"),
       fields: [
-        { name: "date", type: "date", label: L("التاريخ", "Date"), admin: { date: { pickerAppearance: "dayOnly" } } },
+        { name: "date", type: "date", label: L("التاريخ", "Date"), admin: { date: { pickerAppearance: "dayOnly", displayFormat: "dd/MM/yyyy" } } },
         text("time", { label: L("الوقت", "Time") }),
         { name: "price", type: "number", min: 0, label: L("السعر", "Price") },
         {
           name: "currency",
           type: "select",
+          label: L("العملة", "Currency"),
           defaultValue: "JOD",
           options: ["JOD", "USD", "SAR"].map((c) => ({ label: c, value: c })),
         },
-        { name: "phone", type: "text", label: L("هاتف الحجز", "Booking phone") },
-        { name: "whatsapp", type: "text", label: L("رقم واتساب", "WhatsApp number") },
-        href("bookingUrl", false),
+        { name: "phone", type: "text", label: L("هاتف الحجز", "Booking phone"), admin: { className: "gw-ltr" } },
+        { name: "whatsapp", type: "text", label: L("رقم واتساب", "WhatsApp number"), admin: { className: "gw-ltr" } },
+        { ...href("bookingUrl", false), label: L("رابط حجز خارجي (اختياري)", "External booking link (optional)") },
         { name: "available", type: "checkbox", defaultValue: true, label: L("متاحة للحجز", "Available") },
       ],
     },
@@ -259,7 +265,7 @@ export const Partners = content({
     text("name", { required: true, label: L("الاسم", "Name") }),
     image("logo", { label: L("الشعار (اختياري، يظهر الاسم عند عدم وجوده)", "Logo (optional)") }),
     area("details", { label: L("النص الذي يظهر عند الضغط على الشريك", "Text revealed when the partner is clicked") }),
-    href("url", false),
+    { ...href("url", false), label: L("الموقع الإلكتروني (اختياري)", "Website (optional)") },
     { name: "showOnHome", type: "checkbox", defaultValue: true, label: L("يظهر في شريط الصفحة الرئيسية", "Show on home page") },
   ],
 });
@@ -323,7 +329,7 @@ export const Bookings: CollectionConfig = {
     {
       type: "row",
       fields: [
-        { name: "reference", type: "text", unique: true, index: true, required: true, label: L("رقم الطلب", "Reference"), admin: readOnly },
+        { name: "reference", type: "text", unique: true, index: true, required: true, label: L("رقم الطلب", "Reference"), admin: { ...readOnly, className: "gw-ltr" } },
         {
           name: "status",
           type: "select",
@@ -340,8 +346,8 @@ export const Bookings: CollectionConfig = {
     {
       type: "row",
       fields: [
-        { name: "phone", type: "text", required: true, label: L("الهاتف", "Phone") },
-        { name: "email", type: "email", label: L("البريد", "Email") },
+        { name: "phone", type: "text", required: true, label: L("الهاتف", "Phone"), admin: { className: "gw-ltr" } },
+        { name: "email", type: "email", label: L("البريد", "Email"), admin: { className: "gw-ltr" } },
       ],
     },
     {
@@ -354,8 +360,8 @@ export const Bookings: CollectionConfig = {
     {
       type: "row",
       fields: [
-        { name: "startDate", type: "date", required: true, index: true, label: L("تاريخ البداية", "Start date"), admin: { date: { pickerAppearance: "dayOnly" } } },
-        { name: "endDate", type: "date", label: L("تاريخ النهاية", "End date"), admin: { date: { pickerAppearance: "dayOnly" } } },
+        { name: "startDate", type: "date", required: true, index: true, label: L("تاريخ البداية", "Start date"), admin: { date: { pickerAppearance: "dayOnly", displayFormat: "dd/MM/yyyy" } } },
+        { name: "endDate", type: "date", label: L("تاريخ النهاية", "End date"), admin: { date: { pickerAppearance: "dayOnly", displayFormat: "dd/MM/yyyy" } } },
       ],
     },
     {
@@ -373,12 +379,12 @@ export const Bookings: CollectionConfig = {
       label: L("سجل الحالة", "Status history"),
       admin: readOnly,
       fields: [
-        { name: "status", type: "select", options: BOOKING_STATUSES },
-        { name: "at", type: "date", admin: { date: { pickerAppearance: "dayAndTime" } } },
-        { name: "by", type: "text" },
+        { name: "status", type: "select", options: BOOKING_STATUSES, label: L("الحالة", "Status") },
+        { name: "at", type: "date", label: L("الوقت", "Time"), admin: { date: { pickerAppearance: "dayAndTime", displayFormat: "dd/MM/yyyy HH:mm" } } },
+        { name: "by", type: "text", label: L("بواسطة", "By") },
       ],
     },
-    { name: "lang", type: "select", options: ["ar", "en"], admin: readOnly },
+    { name: "lang", type: "select", options: [{ label: "العربية", value: "ar" }, { label: "English", value: "en" }], label: L("لغة العميل", "Customer language"), admin: readOnly },
     {
       name: "suspectedSpam",
       type: "checkbox",
@@ -458,7 +464,7 @@ export const Entries: CollectionConfig = {
       type: "row",
       fields: [
         { name: "trip", type: "text", required: true, label: L("الرحلة", "Trip") },
-        { name: "date", type: "date", required: true, index: true, label: L("التاريخ", "Date"), admin: { date: { pickerAppearance: "dayOnly" } } },
+        { name: "date", type: "date", required: true, index: true, label: L("التاريخ", "Date"), admin: { date: { pickerAppearance: "dayOnly", displayFormat: "dd/MM/yyyy" } } },
       ],
     },
     {

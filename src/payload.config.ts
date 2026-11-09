@@ -50,7 +50,11 @@ export default buildConfig({
     fallbackLanguage: "ar",
     // The top-bar locale picker chooses which language of the *content* is being edited; the interface language
     // has its own button, so the two must not both read "Language"
-    translations: { ar: { general: { locale: "لغة المحتوى" } }, en: { general: { locale: "Content language" } } },
+    // Also: no "Payload" branding in the owner's UI, and a fix for Payload's broken Arabic "restoring" string
+    translations: {
+      ar: { general: { locale: "لغة المحتوى", payloadSettings: "إعدادات العرض", restoring: "جارٍ الاسترجاع..." } },
+      en: { general: { locale: "Content language", payloadSettings: "Display settings" } },
+    },
   },
   localization: {
     locales: [

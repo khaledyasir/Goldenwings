@@ -47,6 +47,8 @@ const S = {
     confirmPublish: "نشر كل تغييرات الصفحة للزوار؟", confirmRevert: "إرجاع كل مسودات هذه الصفحة إلى النسخة المنشورة؟",
     confirmLeave: "لديك تغييرات غير محفوظة. هل تريد المتابعة وفقدانها؟", saved: "تم الحفظ", published: "تم النشر",
     reverted: "تم الإرجاع", pending: "بانتظار الحفظ", current: "الحالية",
+    noChanges: "لا توجد تغييرات غير محفوظة", more: "المزيد", chooseFile: "اختر صورة من جهازك", noFile: "لم يتم اختيار صورة",
+    editing: "وضع التعديل", hintClick: "اضغط على أي نص أو صورة لتعديلها",
   },
   en: {
     changes: "unsaved changes", save: "Save draft", publish: "Publish", discard: "Discard unsaved",
@@ -59,13 +61,18 @@ const S = {
     confirmPublish: "Publish all changes on this page to visitors?", confirmRevert: "Revert all drafts on this page to the published version?",
     confirmLeave: "You have unsaved changes. Leave and lose them?", saved: "Saved", published: "Published",
     reverted: "Reverted", pending: "Pending save", current: "Current",
+    noChanges: "No unsaved changes", more: "More", chooseFile: "Choose an image from your device", noFile: "No image chosen",
+    editing: "Edit mode", hintClick: "Click any text or image to edit it",
   },
 };
 
-const btn = "rounded-md px-3 py-2 text-sm font-semibold disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-gold";
-const btnGold = `${btn} bg-gold text-navy hover:bg-gold-light`;
-const btnGhost = `${btn} bg-white/10 text-white hover:bg-white/20`;
-const field = "w-full rounded-md border border-navy/30 bg-white p-2 text-sm text-navy";
+const btn =
+  "inline-flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3.5 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold";
+const btnGold = `${btn} bg-gold text-navy hover:enabled:bg-gold-light`;
+const btnOutline = `${btn} border border-gold/70 text-gold hover:enabled:bg-gold/10`;
+const btnGhost = `${btn} text-white/90 hover:enabled:bg-white/10`;
+const field =
+  "w-full rounded-lg border border-navy/20 bg-white px-3 py-2.5 text-sm text-navy outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30";
 
 // ---------------------------------------------------------------- helpers
 
@@ -134,6 +141,17 @@ function previewImage(el: HTMLElement, url: string): () => void {
 
 type PanelProps = { lang: Lang; t: (typeof S)["ar"]; fail: (e: unknown) => void; onClose: () => void };
 
+/** "1 unsaved change" with correct Arabic number agreement (1, 2, 3-10, 11+) */
+function pendingLabel(n: number, lang: Lang) {
+  if (lang === "en") return `${n} unsaved ${n === 1 ? "change" : "changes"}`;
+  if (n === 1) return "تغيير واحد غير محفوظ";
+  if (n === 2) return "تغييران غير محفوظين";
+  return n <= 10 ? `${n} تغييرات غير محفوظة` : `${n} تغييراً غير محفوظ`;
+}
+
+/** Small, fast thumbnail through Next's image optimizer instead of the full-size original */
+const thumb = (url: string) => `/_next/image?url=${encodeURIComponent(url.replace(/^https?:\/\/[^/]+(?=\/api\/media\/)/, ""))}&w=256&q=75`; // q must be in next.config images.qualities (default [75])
+
 function PanelShell({ title, t, lang, onClose, children }: { title: string; children: React.ReactNode } & Omit<PanelProps, "fail">) {
   const ref = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -145,15 +163,15 @@ function PanelShell({ title, t, lang, onClose, children }: { title: string; chil
       role="dialog"
       aria-label={title}
       dir={lang === "ar" ? "rtl" : "ltr"}
-      className="fixed inset-y-0 end-0 z-[2147483000] w-full overflow-y-auto bg-white p-4 pb-44 text-navy shadow-2xl sm:w-96"
+      className="fixed inset-y-0 end-0 z-[2147483000] flex w-full flex-col bg-white text-navy shadow-2xl ring-1 ring-navy/10 sm:w-[400px]"
     >
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold">{title}</h2>
-        <button type="button" onClick={onClose} aria-label={t.close} className={`${btn} bg-navy text-white`}>
+      <div className="flex items-center justify-between gap-2 border-b border-navy/10 bg-navy px-5 py-4 text-white">
+        <h2 className="text-base font-bold">{title}</h2>
+        <button type="button" onClick={onClose} aria-label={t.close} className={`${btnGhost} w-9 px-0 text-lg`}>
           ✕
         </button>
       </div>
-      {children}
+      <div className="flex-1 overflow-y-auto p-5 pb-44">{children}</div>
     </aside>
   );
 }
@@ -186,7 +204,7 @@ function TextPanel({ sel, pendingValue, onApply, ...p }: PanelProps & { sel: Sel
       />
       {/\[.*\]/.test(val) && <p className="mt-2 text-xs text-navy/70">{p.t.brackets}</p>}
       {loading && <p className="mt-2 text-xs">{p.t.loading}</p>}
-      <button type="button" disabled={loading} onClick={() => onApply(val)} className={`${btnGold} mt-3`}>
+      <button type="button" disabled={loading} onClick={() => onApply(val)} className={`${btnGold} mt-4 w-full`}>
         {p.t.apply}
       </button>
     </PanelShell>
@@ -237,7 +255,7 @@ function ImagePanel({ sel, onChoose, ...p }: PanelProps & { sel: Sel & { type: "
   return (
     <PanelShell title={p.t.image} {...p}>
       <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={p.t.search} aria-label={p.t.search} className={field} />
-      <ul className="mt-3 grid grid-cols-3 gap-2">
+      <ul className="mt-3 grid grid-cols-3 gap-2.5">
         {items?.map((m) => (
           <li key={m.id}>
             <button
@@ -245,22 +263,29 @@ function ImagePanel({ sel, onChoose, ...p }: PanelProps & { sel: Sel & { type: "
               data-first
               onClick={() => onChoose(m)}
               title={m.alt || m.filename}
-              className={`block aspect-square w-full overflow-hidden rounded-md border-2 ${m.id === current ? "border-gold" : "border-transparent"} hover:border-gold-dark`}
+              className={`block aspect-square w-full overflow-hidden rounded-lg border-2 bg-navy/5 transition ${m.id === current ? "border-gold ring-2 ring-gold/40" : "border-transparent"} hover:border-gold-dark`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={m.thumbnailURL || m.url} alt={m.alt ?? ""} className="h-full w-full object-cover" />
+              <img src={thumb(m.url)} alt={m.alt ?? ""} loading="lazy" className="h-full w-full object-contain p-1" />
             </button>
-            {m.id === current && <span className="text-[10px] font-semibold">{p.t.current}</span>}
+            {m.id === current && <span className="mt-1 block text-center text-[11px] font-bold text-gold-dark">{p.t.current}</span>}
           </li>
         ))}
       </ul>
       {items?.length === 0 && <p className="mt-2 text-sm">{p.t.none}</p>}
       {!items && <p className="mt-2 text-sm">{p.t.loading}</p>}
-      <fieldset className="mt-5 space-y-2 border-t border-navy/20 pt-3">
-        <legend className="text-sm font-bold">{p.t.upload}</legend>
-        <input type="file" accept={MIME.join(",")} onChange={(e) => setFile(e.target.files?.[0] ?? null)} aria-label={p.t.upload} className="block w-full text-sm" />
+      <fieldset className="mt-6 space-y-3 rounded-xl border border-navy/10 bg-navy/[0.03] p-4">
+        <legend className="px-1 text-sm font-bold">{p.t.upload}</legend>
+        {/* Styled picker: the native control would show the browser's own (English) "Choose File" text */}
+        <label className="flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed border-navy/20 bg-white p-3 transition hover:border-gold">
+          <input type="file" accept={MIME.join(",")} onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="sr-only" />
+          <span className="rounded-md bg-navy px-3 py-1.5 text-xs font-bold text-white">{p.t.chooseFile}</span>
+          <span className="min-w-0 truncate text-xs text-navy/60" dir="auto">
+            {file ? file.name : p.t.noFile}
+          </span>
+        </label>
         <input value={alt} onChange={(e) => setAlt(e.target.value)} placeholder={p.t.alt} aria-label={p.t.alt} required className={field} />
-        <button type="button" disabled={busy || !file} onClick={upload} className={btnGold}>
+        <button type="button" disabled={busy || !file} onClick={upload} className={`${btnGold} w-full`}>
           {p.t.uploadBtn}
         </button>
       </fieldset>
@@ -458,45 +483,72 @@ export default function VisualEditor({ lang }: { lang: Lang }) {
       <div
         role="toolbar"
         aria-label="Visual editor"
-        className="fixed bottom-16 left-1/2 z-[2147483001] flex w-[calc(100%-1rem)] max-w-5xl -translate-x-1/2 flex-wrap items-center gap-2 rounded-xl bg-navy p-2 text-white shadow-2xl ring-1 ring-gold/50 md:bottom-4"
+        dir={lang === "ar" ? "rtl" : "ltr"}
+        className="fixed bottom-16 left-1/2 z-[2147483001] flex w-[calc(100%-1rem)] max-w-6xl -translate-x-1/2 flex-wrap items-center gap-2 rounded-2xl bg-navy/95 p-2 text-white shadow-2xl ring-1 ring-gold/40 backdrop-blur md:bottom-4 lg:flex-nowrap"
       >
-        <span aria-live="polite" className="px-2 text-sm font-bold text-gold">
-          {count} {t.changes}
+        <span
+          aria-live="polite"
+          className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-bold ${count ? "bg-gold/15 text-gold" : "text-white/60"}`}
+        >
+          <span className={`h-2 w-2 rounded-full ${count ? "bg-gold" : "bg-emerald-400"}`} aria-hidden="true" />
+          {count ? pendingLabel(count, lang) : t.noChanges}
         </span>
-        <button type="button" disabled={busy || !count} onClick={saveDraft} className={btnGold}>
+
+        <label className="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg bg-white/10 ps-3 text-sm text-white/70">
+          {t.page}
+          <select
+            value={PAGES.some(([p]) => p === here) ? here : ""}
+            disabled={busy}
+            onChange={(e) => !leave(e.target.value) && (e.target.value = here)}
+            className="h-9 cursor-pointer rounded-lg bg-transparent pe-2 text-sm font-bold text-white outline-none [&>option]:text-navy"
+          >
+            {!PAGES.some(([p]) => p === here) && <option value="">{here}</option>}
+            {PAGES.map(([p, ar, en]) => (
+              <option key={p} value={p}>
+                {lang === "ar" ? ar : en}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <span className="hidden flex-1 lg:block" />
+
+        <button type="button" aria-pressed={preview} onClick={() => (setPreview((v) => !v), setSel(null))} className={btnGhost}>
+          {preview ? `✎ ${t.edit}` : `👁 ${t.preview}`}
+        </button>
+
+        <details className="relative">
+          <summary className={`${btnGhost} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
+            {t.more} ▾
+          </summary>
+          <div
+            className="absolute bottom-full end-0 mb-2 flex w-64 flex-col gap-1 rounded-xl bg-navy p-2 shadow-2xl ring-1 ring-gold/30"
+            onClick={(e) => e.currentTarget.parentElement?.removeAttribute("open")}
+          >
+            <button type="button" disabled={busy || !count} onClick={() => confirm(t.confirmLeave) && location.reload()} className={`${btnGhost} justify-start`}>
+              {t.discard}
+            </button>
+            <button type="button" disabled={busy} onClick={revert} className={`${btnGhost} justify-start`}>
+              {t.revert}
+            </button>
+            <a href="/admin" target="_blank" rel="noopener" className={`${btnGhost} justify-start`}>
+              {t.admin} ↗
+            </a>
+          </div>
+        </details>
+
+        <button type="button" disabled={busy || !count} onClick={saveDraft} className={btnOutline}>
           {t.save}
         </button>
         <button type="button" disabled={busy} onClick={publish} className={btnGold}>
           {t.publish}
         </button>
-        <button type="button" disabled={busy || !count} onClick={() => confirm(t.confirmLeave) && location.reload()} className={btnGhost}>
-          {t.discard}
-        </button>
-        <button type="button" disabled={busy} onClick={revert} className={btnGhost}>
-          {t.revert}
-        </button>
-        <button type="button" aria-pressed={preview} onClick={() => (setPreview((v) => !v), setSel(null))} className={btnGhost}>
-          {preview ? t.edit : t.preview}
-        </button>
-        <select
-          aria-label={t.page}
-          value={PAGES.some(([p]) => p === here) ? here : ""}
-          disabled={busy}
-          onChange={(e) => !leave(e.target.value) && (e.target.value = here)}
-          className={`${btn} bg-white text-navy`}
+        <button
+          type="button"
+          onClick={() => leave(`/api/edit-mode?off=1&path=${encodeURIComponent(here + location.search)}`)}
+          className={`${btnGhost} border border-white/20`}
         >
-          {!PAGES.some(([p]) => p === here) && <option value="">{here}</option>}
-          {PAGES.map(([p, ar, en]) => (
-            <option key={p} value={p}>
-              {lang === "ar" ? ar : en}
-            </option>
-          ))}
-        </select>
-        <a href="/admin" target="_blank" rel="noopener" className={`${btnGhost} ms-auto`}>
-          {t.admin}
-        </a>
-        <button type="button" onClick={() => leave(`/api/edit-mode?off=1&path=${encodeURIComponent(here + location.search)}`)} className={btnGhost}>
-          {t.exit}
+          {t.exit} ✕
         </button>
       </div>
     </div>

@@ -31,18 +31,72 @@
   --font-body: var(--gw-font, "Cairo"), -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
-/* Gold primary actions (save, publish, create) */
-.btn--style-primary {
-  background-color: var(--gw-gold) !important;
-  color: var(--gw-navy) !important;
-  border-color: var(--gw-gold) !important;
+/* Gold primary actions (Save / Publish / Create). Payload renders two shapes:
+   - a single <button class="btn btn--style-primary">
+   - a split button: <div class="btn--style-primary btn--withPopup"> holding <button.btn> + <button.popup-button>
+   Only enabled states are recoloured; disabled ones keep Payload's muted look so "nothing to save" stays obvious. */
+button.btn--style-primary:not(.btn--disabled):not(:disabled),
+.btn--style-primary.btn--withPopup:not(.btn--disabled) > .btn,
+.btn--style-primary.btn--withPopup:not(.btn--disabled) .popup-button {
+  background-color: var(--gw-gold);
+  color: var(--gw-navy);
   font-weight: 700;
-  &:hover:not(:disabled) {
-    background-color: var(--gw-gold-light) !important;
+  box-shadow: none;
+  &:hover,
+  &:focus-visible {
+    background-color: var(--gw-gold-light);
+    color: var(--gw-navy);
   }
+}
+.btn--style-primary.btn--withPopup:not(.btn--disabled) .popup-button {
+  /* thin divider between "Publish" and its arrow */
+  border-inline-start: 1px solid rgba(10, 25, 47, 0.25);
+}
+.btn--style-primary.btn--withPopup:not(.btn--disabled) .popup-button .stroke {
+  stroke: var(--gw-navy);
 }
 .btn {
   border-radius: 8px;
+}
+.btn--withPopup > .btn {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+}
+.btn--withPopup .popup-button {
+  border-start-end-radius: 8px;
+  border-end-end-radius: 8px;
+}
+
+/* Header: keep the content-language picker clear of our buttons */
+.app-header__controls-wrapper,
+.app-header__actions,
+.app-header__actions-wrapper {
+  gap: 12px;
+}
+.gw-actions {
+  margin-inline-end: 6px;
+}
+
+/* List rows titled by their own text */
+.gw-row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.gw-row-label__n {
+  min-width: 26px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-600);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+/* Field help texts slightly more readable */
+.field-description {
+  color: var(--theme-elevation-550);
 }
 
 /* ---------------------------------------------------------------- side menu */
@@ -407,4 +461,18 @@ html[data-theme="dark"] .gw-card__head a {
 .gw-status--rejected {
   background: #f7dcdc;
   color: #8a1c1c;
+}
+
+/* Thumbnails: show whole logos instead of cropping them */
+.thumbnail img {
+  object-fit: contain;
+  background: #fff;
+}
+
+/* Phone numbers, emails, links and references always read left-to-right, also inside an Arabic form */
+.gw-ltr input,
+.gw-ltr textarea,
+.field-type.email input {
+  direction: ltr;
+  unicode-bidi: plaintext;
 }

@@ -29,7 +29,7 @@ const page = (slug: string, label: { ar: string; en: string }, path: string, fie
   fields: [seo(), ...fields],
 });
 
-const hero = (...fields: Field[]) => group("hero", [image("image"), ...fields], "Hero");
+const hero = (...fields: Field[]) => group("hero", [image("image", { label: L("صورة الخلفية", "Background image") }), ...fields]);
 
 export const Settings: GlobalConfig = {
   slug: "settings",
@@ -54,12 +54,13 @@ export const Settings: GlobalConfig = {
         {
           label: L("التواصل", "Contact"),
           fields: [
-            { name: "phoneDisplay", type: "text", required: true, label: L("رقم الهاتف كما يظهر", "Phone as displayed") },
+            { name: "phoneDisplay", type: "text", required: true, label: L("رقم الهاتف كما يظهر", "Phone as displayed"), admin: { className: "gw-ltr" } },
             {
               name: "phoneIntl",
               type: "text",
               required: true,
               label: L("رقم الهاتف الدولي (+962...)", "Phone in international format"),
+              admin: { className: "gw-ltr" },
               validate: (v: unknown) => (typeof v === "string" && /^\+\d{8,15}$/.test(v) ? true : "Format: +962796290390"),
             },
             {
@@ -67,9 +68,10 @@ export const Settings: GlobalConfig = {
               type: "text",
               required: true,
               label: L("رقم واتساب بدون + (962...)", "WhatsApp number, digits only"),
+              admin: { className: "gw-ltr" },
               validate: (v: unknown) => (typeof v === "string" && /^\d{8,15}$/.test(v) ? true : "Digits only, e.g. 962796290390"),
             },
-            { name: "email", type: "email", required: true, label: L("البريد الإلكتروني", "Email") },
+            { name: "email", type: "email", required: true, label: L("البريد الإلكتروني", "Email"), admin: { className: "gw-ltr" } },
             href("facebookUrl", false),
             href("instagramUrl", false),
             text("address", { label: L("العنوان", "Address") }),
@@ -105,7 +107,7 @@ export const Settings: GlobalConfig = {
               text("facebook"),
               text("instagram"),
               text("openMenu"),
-              text("copyright", { admin: { description: "{year} is replaced by the current year" } }),
+              text("copyright", { admin: { description: L("{year} يُستبدل بالسنة الحالية", "{year} becomes the current year") } }),
             ]),
           ],
         },
@@ -126,13 +128,13 @@ export const Home = page("home", L("الصفحة الرئيسية", "Home page")
 export const EmployeeTransport = page("employee-transport", L("نقل الموظفين", "Employee transport"), "/employee-transport", [
   hero(area("title"), text("bookLabel")),
   area("intro"),
-  area("stats", { admin: { description: "Numbers in [brackets] are shown large in gold" } }),
+  area("stats", { admin: { description: L("الأرقام بين قوسين [ ] تظهر كبيرة وباللون الذهبي", "Numbers in [brackets] are shown large in gold") } }),
   list("features", [icon(), area("text", { required: true })]),
 ]);
 
 export const TourismTransport = page("tourism-transport", L("النقل السياحي", "Tourism transport"), "/tourism-transport", [
   hero(
-    text("title", { admin: { description: "Words in [brackets] are shown in gold" } }),
+    text("title", { admin: { description: L("الكلمات بين قوسين [ ] تظهر باللون الذهبي", "Words in [brackets] are shown in gold") } }),
     text("subtitle"),
     area("description"),
   ),
@@ -164,8 +166,8 @@ export const AirportTransport = page("airport-transport", L("نقل المطار
 export const FleetPage = page("fleet-page", L("صفحة الأسطول", "Fleet page"), "/fleet", [
   text("title"),
   text("categoriesHeading"),
-  text("seatsLabel", { admin: { description: "{n} is the passenger count" } }),
-  text("seatsLabelFew", { admin: { description: "Used for 10 seats or fewer. {n} is the passenger count" } }),
+  text("seatsLabel", { admin: { description: L("{n} يُستبدل بعدد الركاب", "{n} becomes the passenger count") } }),
+  text("seatsLabelFew", { admin: { description: L("للمركبات بـ 10 مقاعد أو أقل. {n} يُستبدل بعدد الركاب", "For 10 seats or fewer. {n} becomes the passenger count") } }),
   list("safety", [icon(), text("text", { required: true }), area("sub")]),
 ]);
 
@@ -179,7 +181,7 @@ export const PartnersPage = page("partners-page", L("صفحة الشركاء", "
 
 export const TestimonialsPage = page("testimonials-page", L("صفحة آراء العملاء", "Reviews page"), "/testimonials", [
   text("title"),
-  group("placeholder", [text("name"), text("company"), text("quote")], "Shown until real reviews are published"),
+  group("placeholder", [text("name"), text("company"), text("quote")]),
 ]);
 
 export const BookingPage = page("booking-page", L("صفحة الحجز", "Booking page"), "/booking", [
@@ -197,7 +199,7 @@ export const BookingPage = page("booking-page", L("صفحة الحجز", "Bookin
     text("submit"),
   ]),
   area("note"),
-  area("success", { admin: { description: "{ref} is replaced by the booking reference" } }),
+  area("success", { admin: { description: L("{ref} يُستبدل برقم الطلب", "{ref} becomes the booking reference") } }),
   text("error"),
   text("sendWhatsapp"),
 ]);

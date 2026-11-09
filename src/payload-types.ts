@@ -368,6 +368,9 @@ export interface Trip {
   currency?: ('JOD' | 'USD' | 'SAR') | null;
   phone?: string | null;
   whatsapp?: string | null;
+  /**
+   * A site page like /fleet or a full https:// link
+   */
   bookingUrl?: string | null;
   available?: boolean | null;
   itinerary?:
@@ -405,6 +408,9 @@ export interface Partner {
   name: string;
   logo?: (number | null) | Media;
   details?: string | null;
+  /**
+   * A site page like /fleet or a full https:// link
+   */
   url?: string | null;
   showOnHome?: boolean | null;
   updatedAt: string;
@@ -832,6 +838,9 @@ export interface Setting {
   companyName: string;
   slogan?: string | null;
   logo?: (number | null) | Media;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -840,18 +849,33 @@ export interface Setting {
   phoneIntl: string;
   whatsapp: string;
   email: string;
+  /**
+   * A site page like /fleet or a full https:// link
+   */
   facebookUrl?: string | null;
+  /**
+   * A site page like /fleet or a full https:// link
+   */
   instagramUrl?: string | null;
   address?: string | null;
   mapsQuery?: string | null;
+  /**
+   * A site page like /fleet or a full https:// link
+   */
   mapsUrl?: string | null;
   nav?:
     | {
         label: string;
+        /**
+         * A site page like /fleet or a full https:// link
+         */
         href: string;
         children?:
           | {
               label: string;
+              /**
+               * A site page like /fleet or a full https:// link
+               */
               href: string;
               icon?:
                 | (
@@ -903,6 +927,9 @@ export interface Setting {
   footerLinks?:
     | {
         label: string;
+        /**
+         * A site page like /fleet or a full https:// link
+         */
         href: string;
         id?: string | null;
       }[]
@@ -918,7 +945,7 @@ export interface Setting {
     instagram?: string | null;
     openMenu?: string | null;
     /**
-     * {year} is replaced by the current year
+     * {year} becomes the current year
      */
     copyright?: string | null;
   };
@@ -932,6 +959,9 @@ export interface Setting {
  */
 export interface Home {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -946,6 +976,9 @@ export interface Home {
     | {
         title: string;
         description?: string | null;
+        /**
+         * A site page like /fleet or a full https:// link
+         */
         href: string;
         image?: (number | null) | Media;
         icon?:
@@ -1051,6 +1084,9 @@ export interface Home {
  */
 export interface EmployeeTransport {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1122,6 +1158,9 @@ export interface EmployeeTransport {
  */
 export interface TourismTransport {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1202,6 +1241,9 @@ export interface TourismTransport {
  */
 export interface InternationalTransport {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1239,6 +1281,9 @@ export interface InternationalTransport {
  */
 export interface AirportTransport {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1313,6 +1358,9 @@ export interface AirportTransport {
  */
 export interface FleetPage {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1320,11 +1368,11 @@ export interface FleetPage {
   title?: string | null;
   categoriesHeading?: string | null;
   /**
-   * {n} is the passenger count
+   * {n} becomes the passenger count
    */
   seatsLabel?: string | null;
   /**
-   * Used for 10 seats or fewer. {n} is the passenger count
+   * For 10 seats or fewer. {n} becomes the passenger count
    */
   seatsLabelFew?: string | null;
   safety?:
@@ -1385,6 +1433,9 @@ export interface FleetPage {
  */
 export interface TripsPage {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1402,6 +1453,9 @@ export interface TripsPage {
  */
 export interface PartnersPage {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1417,6 +1471,9 @@ export interface PartnersPage {
  */
 export interface TestimonialsPage {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1437,6 +1494,9 @@ export interface TestimonialsPage {
  */
 export interface BookingPage {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -1456,7 +1516,7 @@ export interface BookingPage {
   };
   note?: string | null;
   /**
-   * {ref} is replaced by the booking reference
+   * {ref} becomes the booking reference
    */
   success?: string | null;
   error?: string | null;
@@ -1471,6 +1531,9 @@ export interface BookingPage {
  */
 export interface EntriesPage {
   id: number;
+  /**
+   * Only shown in search results and the browser tab
+   */
   seo?: {
     title?: string | null;
     description?: string | null;
