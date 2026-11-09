@@ -69,7 +69,8 @@ export const hashIp = (ip: string) =>
 
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_MAX = 5;
-const GLOBAL_RATE_MAX = 100;
+const GLOBAL_FLAG_AT = 100; // per window, site-wide: stored but flagged as suspected spam
+const GLOBAL_HARD_MAX = 1000; // per window, site-wide: refused, keeps storage bounded under a flood
 
 /** Stores a booking request. A request is never a confirmed booking: it starts as "new" for staff to review. */
 export async function createBooking(payload: Payload, data: BookingData, ip: string) {
@@ -79,13 +80,14 @@ export async function createBooking(payload: Payload, data: BookingData, ip: str
     where: { and: [{ ipHash: { equals: ipHash } }, { createdAt: { greater_than: new Date(Date.now() - RATE_WINDOW_MS).toISOString() } }] },
   });
   if (recent.totalDocs >= RATE_MAX) throw new BookingError("rate");
-  // Unusual site-wide volume (many addresses at once) is still stored, never refused, so a flood can't lock real
-  // customers out; those requests are flagged for the owner to review and filter
+  // Unusual site-wide volume (many addresses at once) is still stored but flagged, so a moderate flood can't lock real
+  // customers out; only an extreme one is refused
   const all = await payload.count({
     collection: "bookings",
     where: { createdAt: { greater_than: new Date(Date.now() - RATE_WINDOW_MS).toISOString() } },
   });
-  const suspectedSpam = all.totalDocs >= GLOBAL_RATE_MAX;
+  if (all.totalDocs >= GLOBAL_HARD_MAX) throw new BookingError("rate");
+  const suspectedSpam = all.totalDocs >= GLOBAL_FLAG_AT;
 
   // Snapshot of the vehicle as it was named at booking time, survives later renames or archiving
   let vehicleLabel = "";
@@ -129,9 +131,13 @@ export async function createBooking(payload: Payload, data: BookingData, ip: str
 }
 
 /** Optional email to staff. Never throws: a stored booking must not fail because email did. */
-export async function notifyBooking(payload: Payload, booking: { reference: string; name: string; phone: string; startDate: string; vehicleLabel?: string | null }) {
+export async function notifyBooking(
+  payload: Payload,
+  booking: { reference: string; name: string; phone: string; startDate: string; vehicleLabel?: string | null; suspectedSpam?: boolean | null },
+) {
   const to = process.env.BOOKING_NOTIFY_EMAIL;
-  if (!to || !process.env.SMTP_HOST) return;
+  // Flagged requests are reviewed in the admin, not mailed: a flood must not become an email flood
+  if (!to || !process.env.SMTP_HOST || booking.suspectedSpam) return;
   try {
     await payload.sendEmail({
       to,
