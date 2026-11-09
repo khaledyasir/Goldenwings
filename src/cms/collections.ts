@@ -376,6 +376,13 @@ export const Bookings: CollectionConfig = {
       ],
     },
     { name: "lang", type: "select", options: ["ar", "en"], admin: readOnly },
+    {
+      name: "suspectedSpam",
+      type: "checkbox",
+      index: true,
+      label: L("مشتبه بأنه رسائل مزعجة (وصل أثناء ضغط غير معتاد)", "Suspected spam (arrived during unusual volume)"),
+      admin: { readOnly: true, position: "sidebar" },
+    },
     { name: "ipHash", type: "text", index: true, admin: { hidden: true } },
   ],
 };

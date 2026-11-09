@@ -404,6 +404,7 @@ export interface Booking {
       }[]
     | null;
   lang?: ('ar' | 'en') | null;
+  suspectedSpam?: boolean | null;
   ipHash?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -745,6 +746,7 @@ export interface BookingsSelect<T extends boolean = true> {
         id?: T;
       };
   lang?: T;
+  suspectedSpam?: T;
   ipHash?: T;
   updatedAt?: T;
   createdAt?: T;

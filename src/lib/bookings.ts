@@ -79,12 +79,13 @@ export async function createBooking(payload: Payload, data: BookingData, ip: str
     where: { and: [{ ipHash: { equals: ipHash } }, { createdAt: { greater_than: new Date(Date.now() - RATE_WINDOW_MS).toISOString() } }] },
   });
   if (recent.totalDocs >= RATE_MAX) throw new BookingError("rate");
-  // Site-wide ceiling, so rotating addresses can't flood the inbox
+  // Unusual site-wide volume (many addresses at once) is still stored, never refused, so a flood can't lock real
+  // customers out; those requests are flagged for the owner to review and filter
   const all = await payload.count({
     collection: "bookings",
     where: { createdAt: { greater_than: new Date(Date.now() - RATE_WINDOW_MS).toISOString() } },
   });
-  if (all.totalDocs >= GLOBAL_RATE_MAX) throw new BookingError("rate");
+  const suspectedSpam = all.totalDocs >= GLOBAL_RATE_MAX;
 
   // Snapshot of the vehicle as it was named at booking time, survives later renames or archiving
   let vehicleLabel = "";
@@ -115,6 +116,7 @@ export async function createBooking(payload: Payload, data: BookingData, ip: str
           message: data.message || undefined,
           lang: data.lang,
           ipHash,
+          suspectedSpam,
         },
         overrideAccess: true,
       });
