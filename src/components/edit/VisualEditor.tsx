@@ -101,8 +101,13 @@ function withEdits(doc: Doc, edits: Edit[]): Doc {
 function previewText(el: HTMLElement, text: string): () => void {
   const saved: [Node, string | null][] = [];
   el.childNodes.forEach((n) => {
-    if (n.nodeType === 3) saved.push([n, n.nodeValue]), (n.nodeValue = "");
-    else if (n instanceof HTMLElement) saved.push([n, n.style.display]), (n.style.display = "none");
+    if (n.nodeType === 3) {
+      saved.push([n, n.nodeValue]);
+      n.nodeValue = "";
+    } else if (n instanceof HTMLElement) {
+      saved.push([n, n.style.display]);
+      n.style.display = "none";
+    }
   });
   const ghost = document.createElement("span");
   ghost.textContent = text.replace(/[[\]]/g, "");
@@ -157,11 +162,16 @@ function TextPanel({ sel, pendingValue, onApply, ...p }: PanelProps & { sel: Sel
   const [val, setVal] = useState(typeof pendingValue === "string" ? pendingValue : "");
   const [loading, setLoading] = useState(pendingValue === undefined);
   useEffect(() => {
-    if (!loading) return;
+    if (pendingValue !== undefined) return;
+    // Ignore a response that lands after this effect was cleaned up, or it would overwrite what the user typed
+    let live = true;
     api(`/api/globals/${sel.slug}?draft=true&locale=${p.lang}&depth=0`)
-      .then((d) => setVal(String(getIn(d, sel.path.split(".")) ?? "")))
-      .catch(p.fail)
-      .finally(() => setLoading(false));
+      .then((d) => live && setVal(String(getIn(d, sel.path.split(".")) ?? "")))
+      .catch((e) => live && p.fail(e))
+      .finally(() => live && setLoading(false));
+    return () => {
+      live = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
@@ -299,7 +309,12 @@ export default function VisualEditor({ lang }: { lang: Lang }) {
     const onClick = (e: MouseEvent) => {
       const target = e.target as Element | null;
       if (!target || target.closest(`[${ROOT}]`)) return;
-      const el = target.closest<HTMLElement>(MARKERS);
+      // Layered layouts (hero text over a photo) put an unmarked layer on top: fall back to whatever marked
+      // element sits under the pointer, so the photo stays selectable
+      const el =
+        target.closest<HTMLElement>(MARKERS) ??
+        document.elementsFromPoint(e.clientX, e.clientY).find((n): n is HTMLElement => n instanceof HTMLElement && n.matches(MARKERS)) ??
+        null;
       if (!el) return;
       e.preventDefault();
       e.stopPropagation();

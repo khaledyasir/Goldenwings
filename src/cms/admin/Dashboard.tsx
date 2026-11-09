@@ -51,6 +51,8 @@ function Recent({ title, rows }: { title: string; rows: { href: string; text: st
 async function OwnerStats({ payload, user }: { payload: Payload; user: NonNullable<Props["user"]> }) {
   // ponytail: cast because Props.user is structural; swap for payload's TypedUser once types are generated
   const q = { overrideAccess: false, user: user as never } as const;
+  // Server component rendered per request: reading the clock here is intended
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const since = new Date(now - 30 * 864e5).toISOString();
   const today = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
@@ -67,6 +69,18 @@ async function OwnerStats({ payload, user }: { payload: Payload; user: NonNullab
         <Stat label="طلبات حجز جديدة" value={fresh.totalDocs} />
         <Stat label="طلبات آخر 30 يوم" value={month.totalDocs} />
         <Stat label="إدخالات اليوم" value={todays.totalDocs} />
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+        {[
+          ["/api/export?collection=bookings", "تصدير طلبات الحجز (CSV)"],
+          ["/api/export?collection=bookings&status=new", "تصدير الطلبات الجديدة (CSV)"],
+          ["/api/export?collection=entries", "تصدير الإدخالات (CSV)"],
+          ["/admin/collections/entry-options", "قوائم نموذج الإدخالات"],
+        ].map(([href, label]) => (
+          <a key={href} href={href} style={{ ...card, padding: "8px 14px", color: "inherit", textDecoration: "none" }}>
+            {label}
+          </a>
+        ))}
       </div>
       <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
         <Recent

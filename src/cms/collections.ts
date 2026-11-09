@@ -43,6 +43,7 @@ export const Users: CollectionConfig = {
     create: isOwner,
     update: ({ req }) => (isOwner({ req }) ? true : req.user ? { id: { equals: req.user.id } } : false),
     delete: isOwner,
+    unlock: isOwner,
   },
   hooks: {
     // No public sign-up: Payload's "create first user" screen is refused, the owner is created with `npm run owner:create`
@@ -298,7 +299,8 @@ export const Bookings: CollectionConfig = {
     hidden: ({ user }) => (user as { role?: string } | null)?.role !== "owner",
   },
   // Client details are confidential: owner only. Visitors create bookings through the server action, never this API.
-  access: { read: isOwner, create: () => false, update: isOwner, delete: isOwner },
+  // readVersions must be explicit: Payload's default lets any signed-in user read the history (and its PII)
+  access: { read: isOwner, readVersions: isOwner, create: () => false, update: isOwner, delete: isOwner },
   versions: { maxPerDoc: 100 },
   trash: true,
   hooks: {
@@ -429,7 +431,7 @@ export const Entries: CollectionConfig = {
     listSearchableFields: ["client", "trip", "bus", "driver", "authorization", "statement"],
   },
   // Operational records: staff see what they submitted, the owner sees everything. Created only through the /entries server action.
-  access: { read: own, create: () => false, update: isOwner, delete: isOwner },
+  access: { read: own, readVersions: isOwner, create: () => false, update: isOwner, delete: isOwner },
   versions: { maxPerDoc: 50 },
   trash: true,
   fields: [

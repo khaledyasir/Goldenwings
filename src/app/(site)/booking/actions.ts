@@ -17,7 +17,9 @@ export async function submitBooking(_prev: BookingState, form: FormData): Promis
     return { status: "error", fields: v.fields, code: v.spam ? "server" : undefined };
   }
   const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0].trim() || h.get("x-real-ip") || "unknown";
+  // x-real-ip is set by the hosting proxy (Vercel); the left-most X-Forwarded-For entry is client-controlled, so only
+  // the right-most hop (appended by the proxy) is used as a fallback
+  const ip = h.get("x-real-ip") || h.get("x-forwarded-for")?.split(",").pop()?.trim() || "unknown";
   try {
     const payload = await cms();
     const booking = await createBooking(payload, v.data, ip);

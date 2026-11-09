@@ -6,7 +6,7 @@ import { getSettings, isEditing } from "@/lib/cms";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SocialSidebar from "@/components/SocialSidebar";
-import VisualEditor from "@/components/edit/VisualEditor";
+import EditorLoader from "@/components/edit/EditorLoader";
 
 const cairo = Cairo({
   variable: "--font-cairo",
@@ -33,7 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {children}
         <Footer />
         <SocialSidebar />
-        {editing && <VisualEditor lang={lang} />}
+        {editing && <EditorLoader lang={lang} />}
       </body>
     </html>
   );

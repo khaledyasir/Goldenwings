@@ -11,7 +11,13 @@ import { collections } from "./cms/collections";
 import { globals } from "./cms/globals";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-const serverURL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3000";
+// Read at runtime (not NEXT_PUBLIC_*, which is frozen at build time). Vercel's own URLs are trusted too so preview
+// deployments and the production alias work without rebuilding.
+const vercel = [process.env.VERCEL_PROJECT_PRODUCTION_URL, process.env.VERCEL_BRANCH_URL, process.env.VERCEL_URL]
+  .filter(Boolean)
+  .map((host) => `https://${host}`);
+const serverURL = process.env.SERVER_URL || vercel[0] || "http://localhost:3000";
+const trustedOrigins = [...new Set([serverURL, ...vercel])];
 
 if (!process.env.PAYLOAD_SECRET && process.env.NODE_ENV === "production") {
   throw new Error("PAYLOAD_SECRET is required in production");
@@ -21,8 +27,8 @@ export default buildConfig({
   serverURL,
   secret: process.env.PAYLOAD_SECRET || "dev-only-secret-change-me",
   // Cookie-authenticated requests are only accepted from the site itself
-  csrf: [serverURL],
-  cors: [serverURL],
+  csrf: trustedOrigins,
+  cors: trustedOrigins,
   admin: {
     user: "users",
     importMap: { baseDir: path.resolve(dirname) },

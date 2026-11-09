@@ -15,7 +15,7 @@
     "owner:create": "payload run scripts/create-owner.ts --use-swc",
     "migrate": "payload migrate --use-swc",
     "vercel-build": "payload migrate --use-swc && next build",
-    "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
+    "test": "node --import @swc-node/register/esm-register --test --test-force-exit --test-concurrency=1 tests/logic.test.ts tests/access.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

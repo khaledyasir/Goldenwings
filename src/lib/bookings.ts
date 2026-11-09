@@ -69,6 +69,7 @@ export const hashIp = (ip: string) =>
 
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_MAX = 5;
+const GLOBAL_RATE_MAX = 100;
 
 /** Stores a booking request. A request is never a confirmed booking: it starts as "new" for staff to review. */
 export async function createBooking(payload: Payload, data: BookingData, ip: string) {
@@ -78,6 +79,12 @@ export async function createBooking(payload: Payload, data: BookingData, ip: str
     where: { and: [{ ipHash: { equals: ipHash } }, { createdAt: { greater_than: new Date(Date.now() - RATE_WINDOW_MS).toISOString() } }] },
   });
   if (recent.totalDocs >= RATE_MAX) throw new BookingError("rate");
+  // Site-wide ceiling, so rotating addresses can't flood the inbox
+  const all = await payload.count({
+    collection: "bookings",
+    where: { createdAt: { greater_than: new Date(Date.now() - RATE_WINDOW_MS).toISOString() } },
+  });
+  if (all.totalDocs >= GLOBAL_RATE_MAX) throw new BookingError("rate");
 
   // Snapshot of the vehicle as it was named at booking time, survives later renames or archiving
   let vehicleLabel = "";
@@ -133,7 +140,7 @@ export async function notifyBooking(payload: Payload, booking: { reference: stri
         `الهاتف: ${booking.phone}`,
         `المركبة: ${booking.vehicleLabel || "-"}`,
         `التاريخ: ${booking.startDate.slice(0, 10)}`,
-        `${process.env.NEXT_PUBLIC_SERVER_URL ?? ""}/admin/collections/bookings`,
+        `${process.env.SERVER_URL ?? ""}/admin/collections/bookings`,
       ].join("\n"),
     });
   } catch (e) {
