@@ -1,23 +1,36 @@
-/** Prominent entry to the visual editor, shown above the admin navigation */
+"use client";
+
+import Link from "next/link";
+import { useAuth, useTranslation } from "@payloadcms/ui";
+
+/** Shortcuts at the top of the side menu, so the common tasks never need hunting for */
 export function EditSiteLink() {
+  const { i18n } = useTranslation();
+  const { user } = useAuth<{ role?: string }>();
+  const ar = i18n.language !== "en";
+  const role = user?.role;
   return (
-    // A full navigation on purpose: the route sets the edit cookie and redirects; <Link> would prefetch/client-route it
-    // eslint-disable-next-line @next/next/no-html-link-for-pages
-    <a
-      href="/api/edit-mode?path=/"
-      style={{
-        display: "block",
-        margin: "0 0 16px",
-        padding: "10px 14px",
-        borderRadius: 6,
-        background: "#c5a059",
-        color: "#0a192f",
-        fontWeight: 700,
-        textAlign: "center",
-        textDecoration: "none",
-      }}
-    >
-      تعديل الموقع / Edit Website
-    </a>
+    <div className="gw-quick">
+      {/* Full navigations on purpose: the edit route sets a cookie and redirects */}
+      {role !== "staff" && (
+        // eslint-disable-next-line @next/next/no-html-link-for-pages
+        <a className="gw-quick__primary" href="/api/edit-mode?path=/">
+          ✎ {ar ? "تعديل الموقع" : "Edit website"}
+        </a>
+      )}
+      <Link className="gw-quick__link" href="/admin">
+        {ar ? "الرئيسية" : "Home"}
+      </Link>
+      {role === "owner" && (
+        <Link className="gw-quick__link" href="/admin/collections/bookings?where[status][equals]=new">
+          {ar ? "طلبات الحجز الجديدة" : "New booking requests"}
+        </Link>
+      )}
+      {role === "staff" && (
+        <Link className="gw-quick__link" href="/entries">
+          {ar ? "إدخال جديد" : "New entry"}
+        </Link>
+      )}
+    </div>
   );
 }

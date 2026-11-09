@@ -67,18 +67,18 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
-    media: Media;
-    vehicles: Vehicle;
-    'fleet-categories': FleetCategory;
-    amenities: Amenity;
-    trips: Trip;
-    'trip-categories': TripCategory;
-    partners: Partner;
-    testimonials: Testimonial;
     bookings: Booking;
     entries: Entry;
+    vehicles: Vehicle;
+    trips: Trip;
+    partners: Partner;
+    testimonials: Testimonial;
+    media: Media;
+    'fleet-categories': FleetCategory;
+    amenities: Amenity;
+    'trip-categories': TripCategory;
     'entry-options': EntryOption;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,18 +86,18 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    vehicles: VehiclesSelect<false> | VehiclesSelect<true>;
-    'fleet-categories': FleetCategoriesSelect<false> | FleetCategoriesSelect<true>;
-    amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
-    trips: TripsSelect<false> | TripsSelect<true>;
-    'trip-categories': TripCategoriesSelect<false> | TripCategoriesSelect<true>;
-    partners: PartnersSelect<false> | PartnersSelect<true>;
-    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     bookings: BookingsSelect<false> | BookingsSelect<true>;
     entries: EntriesSelect<false> | EntriesSelect<true>;
+    vehicles: VehiclesSelect<false> | VehiclesSelect<true>;
+    trips: TripsSelect<false> | TripsSelect<true>;
+    partners: PartnersSelect<false> | PartnersSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    'fleet-categories': FleetCategoriesSelect<false> | FleetCategoriesSelect<true>;
+    amenities: AmenitiesSelect<false> | AmenitiesSelect<true>;
+    'trip-categories': TripCategoriesSelect<false> | TripCategoriesSelect<true>;
     'entry-options': EntryOptionsSelect<false> | EntryOptionsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -165,6 +165,41 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bookings".
+ */
+export interface Booking {
+  id: number;
+  reference: string;
+  status: 'new' | 'review' | 'confirmed' | 'completed' | 'cancelled' | 'rejected';
+  assignedTo?: (number | null) | User;
+  name: string;
+  phone: string;
+  email?: string | null;
+  vehicle?: (number | null) | Vehicle;
+  vehicleLabel?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  from: string;
+  to: string;
+  message?: string | null;
+  notes?: string | null;
+  statusHistory?:
+    | {
+        status?: ('new' | 'review' | 'confirmed' | 'completed' | 'cancelled' | 'rejected') | null;
+        at?: string | null;
+        by?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  lang?: ('ar' | 'en') | null;
+  suspectedSpam?: boolean | null;
+  ipHash?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -190,25 +225,6 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -242,6 +258,25 @@ export interface FleetCategory {
   layout?: ('detailed' | 'compact') | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -294,6 +329,26 @@ export interface Amenity {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "entries".
+ */
+export interface Entry {
+  id: number;
+  movement: string;
+  type: string;
+  client: string;
+  trip: string;
+  date: string;
+  bus: string;
+  driver: string;
+  authorization: string;
+  statement?: string | null;
+  submittedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -377,61 +432,6 @@ export interface Testimonial {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "bookings".
- */
-export interface Booking {
-  id: number;
-  reference: string;
-  status: 'new' | 'review' | 'confirmed' | 'completed' | 'cancelled' | 'rejected';
-  assignedTo?: (number | null) | User;
-  name: string;
-  phone: string;
-  email?: string | null;
-  vehicle?: (number | null) | Vehicle;
-  vehicleLabel?: string | null;
-  startDate: string;
-  endDate?: string | null;
-  from: string;
-  to: string;
-  message?: string | null;
-  notes?: string | null;
-  statusHistory?:
-    | {
-        status?: ('new' | 'review' | 'confirmed' | 'completed' | 'cancelled' | 'rejected') | null;
-        at?: string | null;
-        by?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  lang?: ('ar' | 'en') | null;
-  suspectedSpam?: boolean | null;
-  ipHash?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "entries".
- */
-export interface Entry {
-  id: number;
-  movement: string;
-  type: string;
-  client: string;
-  trip: string;
-  date: string;
-  bus: string;
-  driver: string;
-  authorization: string;
-  statement?: string | null;
-  submittedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "entry-options".
  */
 export interface EntryOption {
@@ -468,32 +468,20 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
+        relationTo: 'bookings';
+        value: number | Booking;
       } | null)
     | ({
-        relationTo: 'media';
-        value: number | Media;
+        relationTo: 'entries';
+        value: number | Entry;
       } | null)
     | ({
         relationTo: 'vehicles';
         value: number | Vehicle;
       } | null)
     | ({
-        relationTo: 'fleet-categories';
-        value: number | FleetCategory;
-      } | null)
-    | ({
-        relationTo: 'amenities';
-        value: number | Amenity;
-      } | null)
-    | ({
         relationTo: 'trips';
         value: number | Trip;
-      } | null)
-    | ({
-        relationTo: 'trip-categories';
-        value: number | TripCategory;
       } | null)
     | ({
         relationTo: 'partners';
@@ -504,16 +492,28 @@ export interface PayloadLockedDocument {
         value: number | Testimonial;
       } | null)
     | ({
-        relationTo: 'bookings';
-        value: number | Booking;
+        relationTo: 'media';
+        value: number | Media;
       } | null)
     | ({
-        relationTo: 'entries';
-        value: number | Entry;
+        relationTo: 'fleet-categories';
+        value: number | FleetCategory;
+      } | null)
+    | ({
+        relationTo: 'amenities';
+        value: number | Amenity;
+      } | null)
+    | ({
+        relationTo: 'trip-categories';
+        value: number | TripCategory;
       } | null)
     | ({
         relationTo: 'entry-options';
         value: number | EntryOption;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -556,167 +556,6 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
- */
-export interface UsersSelect<T extends boolean = true> {
-  name?: T;
-  role?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  resetPasswordRequestedAt?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "vehicles_select".
- */
-export interface VehiclesSelect<T extends boolean = true> {
-  _order?: T;
-  name?: T;
-  category?: T;
-  capacity?: T;
-  image?: T;
-  gallery?: T;
-  description?: T;
-  amenities?: T;
-  featured?: T;
-  bookable?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "fleet-categories_select".
- */
-export interface FleetCategoriesSelect<T extends boolean = true> {
-  _order?: T;
-  title?: T;
-  layout?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "amenities_select".
- */
-export interface AmenitiesSelect<T extends boolean = true> {
-  _order?: T;
-  name?: T;
-  icon?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "trips_select".
- */
-export interface TripsSelect<T extends boolean = true> {
-  _order?: T;
-  name?: T;
-  category?: T;
-  description?: T;
-  image?: T;
-  gallery?: T;
-  date?: T;
-  time?: T;
-  price?: T;
-  currency?: T;
-  phone?: T;
-  whatsapp?: T;
-  bookingUrl?: T;
-  available?: T;
-  itinerary?:
-    | T
-    | {
-        item?: T;
-        id?: T;
-      };
-  featured?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "trip-categories_select".
- */
-export interface TripCategoriesSelect<T extends boolean = true> {
-  _order?: T;
-  title?: T;
-  kind?: T;
-  emptyHint?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partners_select".
- */
-export interface PartnersSelect<T extends boolean = true> {
-  _order?: T;
-  name?: T;
-  logo?: T;
-  details?: T;
-  url?: T;
-  showOnHome?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "testimonials_select".
- */
-export interface TestimonialsSelect<T extends boolean = true> {
-  _order?: T;
-  name?: T;
-  company?: T;
-  quote?: T;
-  rating?: T;
-  photo?: T;
-  featured?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -773,6 +612,142 @@ export interface EntriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "vehicles_select".
+ */
+export interface VehiclesSelect<T extends boolean = true> {
+  _order?: T;
+  name?: T;
+  category?: T;
+  capacity?: T;
+  image?: T;
+  gallery?: T;
+  description?: T;
+  amenities?: T;
+  featured?: T;
+  bookable?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trips_select".
+ */
+export interface TripsSelect<T extends boolean = true> {
+  _order?: T;
+  name?: T;
+  category?: T;
+  description?: T;
+  image?: T;
+  gallery?: T;
+  date?: T;
+  time?: T;
+  price?: T;
+  currency?: T;
+  phone?: T;
+  whatsapp?: T;
+  bookingUrl?: T;
+  available?: T;
+  itinerary?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "partners_select".
+ */
+export interface PartnersSelect<T extends boolean = true> {
+  _order?: T;
+  name?: T;
+  logo?: T;
+  details?: T;
+  url?: T;
+  showOnHome?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  _order?: T;
+  name?: T;
+  company?: T;
+  quote?: T;
+  rating?: T;
+  photo?: T;
+  featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fleet-categories_select".
+ */
+export interface FleetCategoriesSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  layout?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "amenities_select".
+ */
+export interface AmenitiesSelect<T extends boolean = true> {
+  _order?: T;
+  name?: T;
+  icon?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trip-categories_select".
+ */
+export interface TripCategoriesSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  kind?: T;
+  emptyHint?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "entry-options_select".
  */
 export interface EntryOptionsSelect<T extends boolean = true> {
@@ -782,6 +757,31 @@ export interface EntryOptionsSelect<T extends boolean = true> {
   active?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -32,13 +32,26 @@ export default buildConfig({
   admin: {
     user: "users",
     importMap: { baseDir: path.resolve(dirname) },
-    meta: { titleSuffix: " | الأجنحة الذهبية" },
+    meta: {
+      titleSuffix: " | الأجنحة الذهبية",
+      icons: [{ rel: "icon", type: "image/png", url: "/icon.png" }],
+    },
     components: {
-      beforeDashboard: ["@/cms/admin/Dashboard#Dashboard"],
+      graphics: { Logo: "@/cms/admin/Brand#Logo", Icon: "@/cms/admin/Brand#Icon" },
+      // Top bar: view site, Arabic/English (menu follows the language side), light/dark
+      actions: ["@/cms/admin/HeaderActions#HeaderActions"],
       beforeNavLinks: ["@/cms/admin/EditSiteLink#EditSiteLink"],
+      // Task-oriented home instead of Payload's generic list of collections
+      views: { dashboard: { Component: "@/cms/admin/Dashboard#Dashboard" } },
     },
   },
-  i18n: { supportedLanguages: { ar, en }, fallbackLanguage: "ar" },
+  i18n: {
+    supportedLanguages: { ar, en },
+    fallbackLanguage: "ar",
+    // The top-bar locale picker chooses which language of the *content* is being edited; the interface language
+    // has its own button, so the two must not both read "Language"
+    translations: { ar: { general: { locale: "لغة المحتوى" } }, en: { general: { locale: "Content language" } } },
+  },
   localization: {
     locales: [
       { code: "ar", label: "العربية", rtl: true },

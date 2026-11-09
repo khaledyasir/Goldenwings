@@ -5,7 +5,8 @@ import { area, href, icon, image, list, text } from "./fields";
 
 const L = (ar: string, en: string) => ({ ar, en });
 const CONTENT = L("محتوى الموقع", "Website content");
-const OPS = L("العمليات", "Operations");
+const OPS = L("الحجوزات والعمليات", "Bookings & operations");
+const LISTS = L("القوائم والخيارات", "Lists & options");
 
 const contentAccess = {
   read: publishedLiveOrTeam,
@@ -146,7 +147,7 @@ export const FleetCategories: CollectionConfig = {
   slug: "fleet-categories",
   labels: { singular: L("فئة أسطول", "Fleet category"), plural: L("فئات الأسطول", "Fleet categories") },
   orderable: true,
-  admin: { useAsTitle: "title", group: CONTENT, hidden: hiddenFromStaff },
+  admin: { useAsTitle: "title", group: LISTS, hidden: hiddenFromStaff },
   access: { read: () => true, create: isContentTeam, update: isContentTeam, delete: isContentTeam },
   fields: [
     text("title", { required: true, label: L("الاسم", "Title") }),
@@ -167,7 +168,7 @@ export const Amenities: CollectionConfig = {
   slug: "amenities",
   labels: { singular: L("ميزة", "Amenity"), plural: L("مزايا المركبات", "Vehicle amenities") },
   orderable: true,
-  admin: { useAsTitle: "name", group: CONTENT, hidden: hiddenFromStaff },
+  admin: { useAsTitle: "name", group: LISTS, hidden: hiddenFromStaff },
   access: { read: () => true, create: isContentTeam, update: isContentTeam, delete: isContentTeam },
   fields: [text("name", { required: true, label: L("الاسم", "Name") }), icon()],
 };
@@ -195,7 +196,7 @@ export const TripCategories: CollectionConfig = {
   slug: "trip-categories",
   labels: { singular: L("قسم رحلات", "Trip section"), plural: L("أقسام الرحلات", "Trip sections") },
   orderable: true,
-  admin: { useAsTitle: "title", group: CONTENT, hidden: hiddenFromStaff },
+  admin: { useAsTitle: "title", group: LISTS, hidden: hiddenFromStaff },
   access: { read: () => true, create: isContentTeam, update: isContentTeam, delete: isContentTeam },
   fields: [
     text("title", { required: true, label: L("العنوان", "Title") }),
@@ -400,7 +401,7 @@ export const EntryOptions: CollectionConfig = {
   orderable: true,
   admin: {
     useAsTitle: "label",
-    group: OPS,
+    group: LISTS,
     defaultColumns: ["label", "list", "active"],
     hidden: ({ user }) => (user as { role?: string } | null)?.role !== "owner",
   },
@@ -473,17 +474,18 @@ export const Entries: CollectionConfig = {
   ],
 };
 
+/** Order = side-menu order: operations, then content, then lists/options, then settings */
 export const collections = [
-  Users,
-  Media,
-  Vehicles,
-  FleetCategories,
-  Amenities,
-  Trips,
-  TripCategories,
-  Partners,
-  Testimonials,
   Bookings,
   Entries,
+  Vehicles,
+  Trips,
+  Partners,
+  Testimonials,
+  Media,
+  FleetCategories,
+  Amenities,
+  TripCategories,
   EntryOptions,
+  Users,
 ];
