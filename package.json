@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -H 127.0.0.1",
     "lint": "eslint",
     "db:dev": "node scripts/dev-db.mjs",
     "payload": "payload --use-swc",
@@ -14,7 +14,6 @@
     "seed": "payload run src/seed/cli.ts --use-swc",
     "owner:create": "payload run scripts/create-owner.ts --use-swc",
     "migrate": "payload migrate --use-swc",
-    "vercel-build": "payload migrate --use-swc && next build",
     "test": "node --import @swc-node/register/esm-register --test --test-force-exit --test-concurrency=1 tests/logic.test.ts tests/access.test.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -22,7 +21,6 @@
     "@payloadcms/db-postgres": "^3.93.0",
     "@payloadcms/email-nodemailer": "^3.93.0",
     "@payloadcms/next": "^3.93.0",
-    "@payloadcms/storage-vercel-blob": "^3.93.0",
     "@payloadcms/translations": "^3.93.0",
     "@payloadcms/ui": "^3.93.0",
     "graphql": "^16.15.0",

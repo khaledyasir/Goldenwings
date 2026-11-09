@@ -4,12 +4,12 @@
 
 **Before:** a static Next.js 16 site. All copy lived in `src/lib/constants.ts` and inline `t(lang, "عربي", "English")` pairs; images were files in `/public`. The booking and entries forms only opened a WhatsApp message, so nothing was stored. There was no backend, database or login.
 
-**Chosen:** [Payload CMS 3](https://payloadcms.com) running inside this Next.js app, with PostgreSQL and Vercel Blob for uploads.
+**Chosen:** [Payload CMS 3](https://payloadcms.com) running inside this Next.js app, with PostgreSQL. Uploaded images are stored on the server's disk.
 
 Why Payload, not a hand-built CMS on Supabase:
 
 - **Built in, so not written here:** auth with sessions, lockout and password reset; role-based access on every operation; an Arabic RTL admin UI; field-level ar/en localization, which maps 1:1 onto the site's existing `{ ar, en }` pairs; drafts, version history with restore, a media library, trash (soft delete) and drag-to-reorder.
-- **Hosting:** it runs in the same Vercel deployment as the site. There is no second service to host.
+- **Hosting:** it runs in the same Node.js process as the site. There is no second service to host. Deployment: [DEPLOY_WINDOWS.md](DEPLOY_WINDOWS.md).
 - **Database:** Postgres is the store. Supabase or Neon both work as the Postgres host; Supabase Auth and Storage aren't needed.
 
 **Bespoke code** is limited to the things Payload doesn't provide:
@@ -70,7 +70,7 @@ Text fields render as plain text, never as HTML. Text in `[brackets]` is highlig
 
 ```bash
 npm install                      # .npmrc sets legacy-peer-deps: npm 12's resolver stalls on Payload's peer graph without it
-cp .env.example .env             # fill PAYLOAD_SECRET; DATABASE_URL already points at the dev DB
+cp .env.example .env             # fill PAYLOAD_SECRET, uncomment PAYLOAD_PUSH=true; DATABASE_URL points at the dev DB
 npm run db:dev                   # embedded PostgreSQL 18 on :54329 (no Docker), keep running
 npm run seed                     # imports the original site content (safe to re-run)
 npm run owner:create -- you@example.com "Your Name"
@@ -80,7 +80,7 @@ npm run dev                      # http://localhost:3000, admin at /admin
 **Notes:**
 
 - **Node version:** Payload 3.93 declares Node ≥ 22.23.4 or ≥ 24.22.1. Its CLI is run with `--use-swc` (the npm scripts do this) because its default tsx loader fails on older Node 24 patch releases. Upgrading Node removes the need, but the flag is harmless.
-- **Dev database schema:** pushed automatically from the config. Production only changes through migrations.
+- **Dev database schema:** synced automatically from the config when `PAYLOAD_PUSH=true` (development only). The server only changes through migrations (`npm run migrate`).
 - **Schema changes:** after changing collections or globals, run:
   - `npm run generate` (TypeScript types and admin import map)
   - `npm run payload -- migrate:create <name>`, then commit the migration.
@@ -94,34 +94,17 @@ npm test                     # validation + permission tests against the goldenw
 BASE_URL=http://localhost:3000 OWNER_EMAIL=... OWNER_PASSWORD=... BROWSER="path/to/chrome-or-brave" node tests/e2e.mjs
 ```
 
-## Deploying to Vercel
+## Deploying
 
-1. **Postgres:**
-   - Create a database: Vercel Marketplace → Neon or Supabase, or any Postgres 14+.
-   - Put its connection string in `DATABASE_URL`. Use the pooled URL on serverless.
-2. **Blob store:** Vercel → Storage → Blob → create one. This sets `BLOB_READ_WRITE_TOKEN`. Without it, uploads would go to the server filesystem, which Vercel discards.
-3. **Environment variables** (Production and Preview):
-   - `PAYLOAD_SECRET`: 32+ random bytes, different per environment.
-   - `SERVER_URL`: for example `https://goldenwingsjo.com`. It is read at runtime. Vercel's own deployment URLs are trusted automatically.
-   - Optional: `SMTP_*` for password reset, and `BOOKING_NOTIFY_EMAIL` for an email per new booking request.
-4. **Build:**
-   - Vercel prefers a `vercel-build` script when one exists. To be explicit, set Project → Settings → Build Command to `npm run vercel-build`.
-   - That script is `payload migrate --use-swc && next build`. It applies committed migrations to the database first.
-   - `.npmrc` already sets `legacy-peer-deps`, so the default install command works.
-5. **First deploy, once, from a machine with the production env loaded:**
-   - `npm run seed` imports the original content.
-   - `npm run owner:create -- owner@goldenwingsjo.com "Owner"` creates the owner account.
-   - Sign in at `/admin` and change the password.
-6. **Preview deployments:** point Preview at a separate database or branch so tests and drafts never touch production data.
+The site is self-hosted on Windows Server (IIS in front, the app as a Windows service, PostgreSQL on the same
+machine, images on disk). Step-by-step: **[DEPLOY_WINDOWS.md](DEPLOY_WINDOWS.md)**, including backups, restore
+and updates (`scripts/windows/`).
 
-### Backups and rollback
+### Rollback
 
-- **Database:** use the provider's point-in-time restore (Neon and Supabase both have it). Also take a periodic `pg_dump "$DATABASE_URL" > backup.sql` before migrations.
-- **Content:** any page or settings change can be rolled back in the admin under that global → Versions → Restore. Deleted collection items go to Trash and can be restored.
-- **Code:** redeploy a previous Vercel deployment.
-  - If that deployment predates a migration, restore the database snapshot taken before the migration.
-  - Or write a down migration: `payload migrate:down`.
-- **Images:** Blob files stay when an image is replaced. Deletion is blocked while an image is referenced.
+- **Content:** any page or settings change can be rolled back in the admin under that page → Versions → Restore. Deleted items go to Trash and can be restored.
+- **Database / images:** restore the nightly backup (`scripts/windows/backup.ps1` output). `update.ps1` also takes one before every update.
+- **Code:** check out the previous commit and run the build again. If that commit predates a migration, restore the database backup taken before the update, or run `npm run payload -- migrate:down`.
 
 ## Status
 
@@ -136,18 +119,17 @@ BASE_URL=http://localhost:3000 OWNER_EMAIL=... OWNER_PASSWORD=... BROWSER="path/
 
 **Needs external configuration:**
 
-- Production Postgres, the Blob token, `PAYLOAD_SECRET` and `SERVER_URL`.
+- The server: PostgreSQL, `.env` (`DATABASE_URL`, `PAYLOAD_SECRET`, `SERVER_URL`, `MEDIA_DIR`), IIS + HTTPS certificate.
 - SMTP, for password-reset email and booking notifications. Without it, emails are written to the server log.
 
 **Security trade-offs accepted (from the security review), with the upgrade path:**
 
-- **Login lockout:** five wrong passwords lock an account for 15 minutes. Anyone who knows the owner's email could keep it locked. Add edge rate-limiting on `/api/users/login` (Vercel Firewall rule) if that ever happens.
+- **Login lockout:** five wrong passwords lock an account for 15 minutes. Anyone who knows the owner's email could keep it locked. Add rate limiting on `/api/users/login` in IIS (Dynamic IP Restrictions) if that ever happens.
 - **Booking floods:**
   - The limit is 5 requests per IP (IPv6 per /64) every 10 minutes.
   - Site-wide, requests from 100 per 10 minutes are stored but flagged as suspected spam, and no email is sent for them.
   - Above 1,000 per 10 minutes, requests are refused.
   - Adding a challenge such as Cloudflare Turnstile for unusual volume would remove the trade-off, but needs an account.
-- **Images:** `next.config.ts` allows images from any `*.public.blob.vercel-storage.com` host. Once the Blob store exists, pin it to that store's hostname.
 - **Document locks:** any signed-in user can create or clear Payload's "document is being edited" locks. This is a nuisance only, with no data access.
 
 **Deliberately not built:**

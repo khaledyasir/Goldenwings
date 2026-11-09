@@ -7,6 +7,7 @@ import { after, before, test } from "node:test";
 import { getPayload, type Payload } from "payload";
 
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL ?? "postgres://postgres:postgres@127.0.0.1:54329/goldenwings_test";
+process.env.PAYLOAD_PUSH = "true"; // throwaway test database: sync the schema directly
 const { default: config } = await import("../src/payload.config.ts");
 const { seed } = await import("../src/seed/run.ts");
 const { createBooking } = await import("../src/lib/bookings.ts");

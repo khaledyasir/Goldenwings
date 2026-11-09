@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { CollectionConfig, Field, Payload } from "payload";
 import { APIError } from "payload";
 import { isContentTeam, isOwner, ownerField, publishedLiveOrTeam } from "./access";
@@ -127,6 +128,8 @@ export const Media: CollectionConfig = {
   access: { read: () => true, create: isContentTeam, update: isContentTeam, delete: isContentTeam },
   upload: {
     // No SVG: it can carry script and the files are served from the site's own origin
+    // Uploaded files live on the server's disk. MEDIA_DIR puts them outside the app folder so updates never touch them.
+    staticDir: process.env.MEDIA_DIR || path.resolve(process.cwd(), "media"),
     mimeTypes: ["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif"],
     focalPoint: true,
     // Admin thumbnails through Next's image optimizer: originals can be several MB

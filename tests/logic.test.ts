@@ -69,4 +69,7 @@ test("IPv6 rate-limit buckets are per /64", async () => {
   assert.equal(ipBucket("2001:db8::1"), "2001:db8:0:0");
   assert.equal(ipBucket("::ffff:203.0.113.7"), "203.0.113.7");
   assert.equal(ipBucket("::1"), "0:0:0:0");
+  // Ports appended by the reverse proxy are ignored
+  assert.equal(ipBucket("203.0.113.7:51234"), "203.0.113.7");
+  assert.equal(ipBucket("[2001:db8::1]:51234"), "2001:db8:0:0");
 });

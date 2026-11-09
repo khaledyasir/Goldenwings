@@ -66,7 +66,14 @@ export function newReference(now = new Date()) {
 
 /** IPv6 is bucketed by /64: one subscriber usually controls a whole /64, so per-address limits would be moot */
 export function ipBucket(raw: string) {
-  const ip = raw.trim().toLowerCase().replace(/^\[|\]$/g, "").replace(/%.*$/, ""); // brackets, zone id
+  // Proxies such as IIS/ARR may append the client port: "1.2.3.4:5678" or "[2001:db8::1]:5678". Drop it, or every
+  // new connection would count as a new visitor.
+  const ip = raw
+    .trim()
+    .toLowerCase()
+    .replace(/^(\d+\.\d+\.\d+\.\d+):\d+$/, "$1")
+    .replace(/^\[([^\]]+)\](?::\d+)?$/, "$1")
+    .replace(/%.*$/, ""); // zone id
   const mapped = ip.match(/^(?:0{0,4}:){0,5}(?:0{0,4}:)?ffff:(\d+\.\d+\.\d+\.\d+)$/) ?? ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
   if (mapped) return mapped[1]; // IPv4-mapped IPv6 is the IPv4 address
   if (!ip.includes(":")) return ip;

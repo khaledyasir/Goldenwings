@@ -2,7 +2,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
-import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import { ar } from "@payloadcms/translations/languages/ar";
 import { en } from "@payloadcms/translations/languages/en";
@@ -11,13 +10,10 @@ import { collections } from "./cms/collections";
 import { globals } from "./cms/globals";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-// Read at runtime (not NEXT_PUBLIC_*, which is frozen at build time). Vercel's own URLs are trusted too so preview
-// deployments and the production alias work without rebuilding.
-const vercel = [process.env.VERCEL_PROJECT_PRODUCTION_URL, process.env.VERCEL_BRANCH_URL, process.env.VERCEL_URL]
-  .filter(Boolean)
-  .map((host) => `https://${host}`);
-const serverURL = process.env.SERVER_URL || vercel[0] || "http://localhost:3000";
-const trustedOrigins = [...new Set([serverURL, ...vercel])];
+// Public address of the site, read at runtime (e.g. https://goldenwingsjo.com). Cookie-authenticated requests are
+// only accepted from this origin.
+const serverURL = process.env.SERVER_URL || "http://localhost:3000";
+const trustedOrigins = [serverURL];
 
 if (!process.env.PAYLOAD_SECRET && process.env.NODE_ENV === "production") {
   throw new Error("PAYLOAD_SECRET is required in production");
@@ -70,17 +66,10 @@ export default buildConfig({
   db: postgresAdapter({
     pool: { connectionString: process.env.DATABASE_URL },
     migrationDir: path.resolve(dirname, "migrations"),
-    // Dev pushes the schema straight to the local database; production only changes through committed migrations
-    push: process.env.NODE_ENV !== "production" && process.env.PAYLOAD_PUSH !== "false",
+    // Schema changes reach a database only through committed migrations (npm run migrate). Development machines
+    // opt in to pushing the schema directly with PAYLOAD_PUSH=true; the server never does, even for CLI scripts.
+    push: process.env.PAYLOAD_PUSH === "true",
   }),
-  plugins: [
-    // Uploads go to Vercel Blob when the token is set (production). Without it, files go to ./media (local dev only).
-    vercelBlobStorage({
-      enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
-      collections: { media: true },
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    }),
-  ],
   // Password-reset and booking emails go out only when SMTP is configured; otherwise Payload logs them to the console
   email: process.env.SMTP_HOST
     ? nodemailerAdapter({
