@@ -84,6 +84,10 @@ powershell -ExecutionPolicy Bypass -File scripts\windows\install-service.ps1 -Ns
 ```
 
 It should report `HTTP 200`. Logs: `D:\goldenwings-data\logs\site.log` and `site-error.log`.
+
+The service runs as its own limited account, `NT SERVICE\GoldenWings`, not as SYSTEM. The script gives it read
+access to the code, write access only to `.next` (image cache), the images folder and the logs, and locks `.env`
+so only Administrators, SYSTEM and the service can read it.
 Manage it like any service: `Restart-Service GoldenWings`, or **services.msc**.
 
 ## 6. IIS: connect the domain to the app
@@ -122,6 +126,8 @@ schtasks /create /tn "GoldenWings Backup" /sc daily /st 03:00 /ru SYSTEM /rl HIG
 ```
 
 Each run writes `db_<date>.dump` (database) and `media_<date>.zip` (images) and deletes copies older than 14 days.
+The backup folder is restricted to Administrators and SYSTEM because it contains all booking details; run the
+script from an Administrator PowerShell when running it by hand.
 Copy `D:\goldenwings-backups` to another machine or cloud storage regularly: a backup on the same disk does not
 survive a disk failure.
 
@@ -129,8 +135,10 @@ survive a disk failure.
 
 ```powershell
 Stop-Service GoldenWings
+$env:PGPASSWORD = Read-Host "Database password"      # kept off the command line
 & "C:\Program Files\PostgreSQL\17\bin\pg_restore.exe" --clean --if-exists --no-owner `
-  --dbname="postgres://goldenwings:PASSWORD@127.0.0.1:5432/goldenwings" D:\goldenwings-backups\db_2026-11-09_0300.dump
+  --host=127.0.0.1 --username=goldenwings --dbname=goldenwings D:\goldenwings-backups\db_2026-11-09_0300.dump
+Remove-Item Env:PGPASSWORD
 Expand-Archive D:\goldenwings-backups\media_2026-11-09_0300.zip -DestinationPath D:\goldenwings-data\media -Force
 Start-Service GoldenWings
 ```
