@@ -35,6 +35,8 @@ try {
   Step "Install packages" { npm ci }
   Step "Apply database migrations" { npm run migrate }
   Step "Build" { npm run build }
+  # The build recreates .next; the service account needs write access there for its image cache
+  Step "Permissions" { icacls (Join-Path $AppDir ".next") /grant "NT SERVICE\${Service}:(OI)(CI)M" /T /Q }
 } finally {
   # Start again even after a failure: on an error before the build, the previous build is still in place
   Write-Output "==> Start service"

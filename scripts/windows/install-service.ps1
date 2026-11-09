@@ -20,6 +20,28 @@ $node = (Get-Command node -ErrorAction Stop).Source
 New-Item -ItemType Directory -Force $LogDir | Out-Null
 
 & $Nssm install $Service $node "node_modules\next\dist\bin\next" start -H 127.0.0.1 -p $Port
+
+# Run as the service's own virtual account instead of SYSTEM: if the site were ever compromised, the attacker
+# gets only what this account can touch. Virtual accounts need no password and are managed by Windows.
+$account = "NT SERVICE\$Service"
+sc.exe config $Service obj= $account | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "Could not set the service account" }
+
+$vars = @{}
+foreach ($line in Get-Content (Join-Path $AppDir ".env")) {
+  if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$') { $vars[$Matches[1]] = $Matches[2].Trim('"') }
+}
+$mediaDir = if ($vars["MEDIA_DIR"]) { $vars["MEDIA_DIR"] } else { Join-Path $AppDir "media" }
+New-Item -ItemType Directory -Force $mediaDir | Out-Null
+
+# Read the code; write only the build cache, uploaded images and logs
+icacls $AppDir /grant "${account}:(OI)(CI)RX" /T /Q | Out-Null
+icacls (Join-Path $AppDir ".next") /grant "${account}:(OI)(CI)M" /T /Q | Out-Null
+icacls $mediaDir /grant "${account}:(OI)(CI)M" /T /Q | Out-Null
+icacls $LogDir /grant "${account}:(OI)(CI)M" /T /Q | Out-Null
+# .env holds the database password and session secret: Administrators, SYSTEM and the service only
+icacls (Join-Path $AppDir ".env") /inheritance:r /grant:r "*S-1-5-32-544:F" "*S-1-5-18:F" "${account}:R" | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "Could not set file permissions" }
 & $Nssm set $Service DisplayName "Golden Wings website"
 & $Nssm set $Service Description "Golden Wings site and admin (Next.js + Payload). Settings in $AppDir\.env"
 & $Nssm set $Service AppDirectory $AppDir

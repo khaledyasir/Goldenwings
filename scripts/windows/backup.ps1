@@ -33,12 +33,26 @@ if (-not $PgBin) {
 }
 
 New-Item -ItemType Directory -Force $BackupDir | Out-Null
+# Backups contain every booking and customer detail: only Administrators (S-1-5-32-544) and SYSTEM (S-1-5-18).
+# SIDs instead of names because group names are translated on non-English Windows.
+icacls $BackupDir /inheritance:r /grant:r "*S-1-5-32-544:(OI)(CI)F" "*S-1-5-18:(OI)(CI)F" | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "Could not restrict permissions on $BackupDir" }
 $stamp = Get-Date -Format "yyyy-MM-dd_HHmm"
 
-# 1) Database (custom format: compressed, restorable with pg_restore)
-$dump = Join-Path $BackupDir "db_$stamp.dump"
-& (Join-Path $PgBin "pg_dump.exe") --format=custom --no-owner --file="$dump" --dbname="$($vars['DATABASE_URL'])"
-if ($LASTEXITCODE -ne 0) { throw "pg_dump failed with exit code $LASTEXITCODE" }
+# 1) Database (custom format: compressed, restorable with pg_restore).
+# The password goes through PGPASSWORD, not the command line, where other local users could read it.
+$db = [System.Uri]$vars["DATABASE_URL"]
+$user, $pass = $db.UserInfo -split ":", 2
+$port = if ($db.Port -gt 0) { $db.Port } else { 5432 }
+$env:PGPASSWORD = [System.Uri]::UnescapeDataString("$pass")
+try {
+  $dump = Join-Path $BackupDir "db_$stamp.dump"
+  & (Join-Path $PgBin "pg_dump.exe") --format=custom --no-owner --file="$dump" `
+    --host=$($db.Host) --port=$port --username=$([System.Uri]::UnescapeDataString($user)) --dbname=$($db.AbsolutePath.TrimStart('/'))
+  if ($LASTEXITCODE -ne 0) { throw "pg_dump failed with exit code $LASTEXITCODE" }
+} finally {
+  Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue
+}
 
 # 2) Uploaded images
 if ((Test-Path $mediaDir) -and (Get-ChildItem $mediaDir -File -Recurse | Select-Object -First 1)) {
