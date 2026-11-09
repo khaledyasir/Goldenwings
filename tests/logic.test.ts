@@ -63,4 +63,10 @@ test("IPv6 rate-limit buckets are per /64", async () => {
   assert.equal(ipBucket("2001:db8:1:2:aaaa::1"), ipBucket("2001:db8:1:2:bbbb::9"));
   assert.notEqual(ipBucket("2001:db8:1:2::1"), ipBucket("2001:db8:1:3::1"));
   assert.equal(ipBucket("203.0.113.7"), "203.0.113.7");
+  // Different spellings of the same /64 share one bucket
+  const same = ["2001:db8::1", "2001:DB8:0:0::2", "2001:0db8:0000:0000:ffff::3", "[2001:db8::4]", "2001:db8:0:0:0:0:0:5"];
+  assert.equal(new Set(same.map(ipBucket)).size, 1);
+  assert.equal(ipBucket("2001:db8::1"), "2001:db8:0:0");
+  assert.equal(ipBucket("::ffff:203.0.113.7"), "203.0.113.7");
+  assert.equal(ipBucket("::1"), "0:0:0:0");
 });

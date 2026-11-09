@@ -65,7 +65,21 @@ export function newReference(now = new Date()) {
 }
 
 /** IPv6 is bucketed by /64: one subscriber usually controls a whole /64, so per-address limits would be moot */
-export const ipBucket = (ip: string) => (ip.includes(":") ? ip.split(":").slice(0, 4).join(":") : ip);
+export function ipBucket(raw: string) {
+  const ip = raw.trim().toLowerCase().replace(/^\[|\]$/g, "").replace(/%.*$/, ""); // brackets, zone id
+  const mapped = ip.match(/^(?:0{0,4}:){0,5}(?:0{0,4}:)?ffff:(\d+\.\d+\.\d+\.\d+)$/) ?? ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mapped) return mapped[1]; // IPv4-mapped IPv6 is the IPv4 address
+  if (!ip.includes(":")) return ip;
+  // Expand "::" to the missing zero groups so every spelling of one address yields the same 8 hextets
+  const [head, tail = ""] = ip.split("::");
+  const h = head ? head.split(":") : [];
+  const t = ip.includes("::") && tail ? tail.split(":") : [];
+  const groups = ip.includes("::") ? [...h, ...Array(Math.max(0, 8 - h.length - t.length)).fill("0"), ...t] : h;
+  return groups
+    .slice(0, 4)
+    .map((g) => (parseInt(g, 16) || 0).toString(16))
+    .join(":");
+}
 export const hashIp = (ip: string) =>
   createHash("sha256").update(`${process.env.PAYLOAD_SECRET ?? ""}:${ipBucket(ip)}`).digest("hex").slice(0, 32);
 
