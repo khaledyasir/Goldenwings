@@ -24,8 +24,7 @@ New-Item -ItemType Directory -Force $LogDir | Out-Null
 # Run as the service's own virtual account instead of SYSTEM: if the site were ever compromised, the attacker
 # gets only what this account can touch. Virtual accounts need no password and are managed by Windows.
 $account = "NT SERVICE\$Service"
-sc.exe config $Service obj= $account | Out-Null
-if ($LASTEXITCODE -ne 0) { throw "Could not set the service account" }
+# NSSM 2.24 rejects virtual accounts ("Invalid account name"), so the account is switched AFTER all nssm settings below.
 
 $vars = @{}
 foreach ($line in Get-Content (Join-Path $AppDir ".env")) {
@@ -53,6 +52,8 @@ if ($LASTEXITCODE -ne 0) { throw "Could not set file permissions" }
 & $Nssm set $Service AppStderr (Join-Path $LogDir "site-error.log")
 & $Nssm set $Service AppRotateFiles 1
 & $Nssm set $Service AppRotateBytes 10485760
+sc.exe config $Service obj= $account | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "Could not set the service account" }
 & $Nssm start $Service
 
 Start-Sleep -Seconds 8
