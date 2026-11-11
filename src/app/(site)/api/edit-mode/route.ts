@@ -6,12 +6,17 @@ function safePath(p: string | null) {
   return p && /^\/(?![/\\])[^\\\u0000-\u001f]*$/.test(p) ? p : "/";
 }
 
+/** Relative Location: behind IIS, request.url is the internal 127.0.0.1:3000 address, not the public domain */
+function redirectTo(path: string) {
+  return new NextResponse(null, { status: 303, headers: { Location: path } });
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const path = safePath(searchParams.get("path"));
 
   if (searchParams.get("off") === "1") {
-    const res = NextResponse.redirect(new URL(path, request.url), 303);
+    const res = redirectTo(path);
     res.cookies.delete(EDIT_COOKIE);
     return res;
   }
@@ -20,10 +25,10 @@ export async function GET(request: NextRequest) {
   const role = (user as { role?: string } | null)?.role;
   if (role !== "owner" && role !== "editor") {
     const back = request.nextUrl.pathname + request.nextUrl.search;
-    return NextResponse.redirect(new URL(`/admin/login?redirect=${encodeURIComponent(back)}`, request.url), 303);
+    return redirectTo(`/admin/login?redirect=${encodeURIComponent(back)}`);
   }
 
-  const res = NextResponse.redirect(new URL(path, request.url), 303);
+  const res = redirectTo(path);
   res.cookies.set(EDIT_COOKIE, "1", {
     httpOnly: true,
     sameSite: "lax",
